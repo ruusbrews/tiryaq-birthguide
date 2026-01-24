@@ -1,0 +1,158 @@
+/**
+ * Critical Decision Screen: Baby Breathing
+ * 
+ * Determines if newborn needs immediate resuscitation.
+ * 
+ * PRD Reference: Section 3, Decision Point 4
+ */
+
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    ActivityIndicator,
+    Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import voiceService from '../services/voice';
+import decisionTreeService from '../services/decisionTree';
+
+const BabyBreathingDecisionScreen: React.FC = () => {
+    const router = useRouter();
+
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [processing, setProcessing] = useState(false);
+    const [voiceAvailable, setVoiceAvailable] = useState(false);
+
+    const QUESTION_TEXT = 'هل الطفل يتنفس أو يبكي؟';
+
+    const OPTIONS = [
+        { label: 'نعم', value: 'نعم', isEmergency: false },
+        { label: 'لا', value: 'لا', isEmergency: true },
+    ];
+
+    useEffect(() => {
+        checkVoice();
+    }, []);
+
+    const checkVoice = async () => {
+        const caps = await voiceService.getCapabilities();
+        setVoiceAvailable(caps.ttsAvailable);
+        if (caps.ttsAvailable) {
+            speakQuestion();
+        }
+    };
+
+    const speakQuestion = async () => {
+        setIsSpeaking(true);
+        await voiceService.speak(QUESTION_TEXT);
+        setIsSpeaking(false);
+    };
+
+    const handleResponse = async (value: string) => {
+        try {
+            setProcessing(true);
+            await voiceService.stopSpeaking();
+
+            await decisionTreeService.handleDecisionResponse('baby_breathing', value);
+
+            const state = await decisionTreeService.getCurrentState();
+
+            if (state?.emergencyActive && state.emergencyType) {
+                router.replace({
+                    pathname: '/emergency',
+                    params: { type: state.emergencyType }
+                });
+            } else {
+                // Baby breathing -> Postpartum
+                Alert.alert(
+                    'الحمد لله',
+                    'الطفل بخير. سننتقل الآن إلى مرحلة ما بعد الولادة.',
+                    [{ text: 'متابعة', onPress: () => router.replace('/guide') }]
+                );
+            }
+        } catch (error) {
+            console.error('Decision failed:', error);
+            Alert.alert('خطأ', 'حدث خطأ في حفظ الاستجابة');
+            setProcessing(false);
+        }
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.content}>
+                <View style={styles.header}>
+                    <Text style={styles.questionText}>{QUESTION_TEXT}</Text>
+                    {isSpeaking && (
+                        <View style={styles.speakingIndicator}>
+                            <ActivityIndicator size="small" color="#007AFF" />
+                            <Text style={styles.speakingText}>جاري القراءة...</Text>
+                        </View>
+                    )}
+                    {voiceAvailable && (
+                        <TouchableOpacity
+                            style={styles.repeatButton}
+                            onPress={speakQuestion}
+                            disabled={isSpeaking}
+                        >
+                            <Text style={styles.repeatButtonText}>🔊 إعادة السؤال</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                <View style={styles.optionsContainer}>
+                    {OPTIONS.map((option) => (
+                        <TouchableOpacity
+                            key={option.value}
+                            style={[
+                                styles.optionButton,
+                                option.isEmergency && styles.emergencyOptionWarning
+                            ]}
+                            onPress={() => handleResponse(option.value)}
+                            disabled={processing}
+                        >
+                            <Text style={styles.optionText}>{option.label}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                {processing && (
+                    <View style={styles.processingContainer}>
+                        <ActivityIndicator size="large" color="#007AFF" />
+                        <Text style={styles.processingText}>جاري المعالجة...</Text>
+                    </View>
+                )}
+            </ScrollView>
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#F5F5F5' },
+    content: { padding: 20, flexGrow: 1, justifyContent: 'center' },
+    header: {
+        backgroundColor: 'white', padding: 24, borderRadius: 16, marginBottom: 32, alignItems: 'center',
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3,
+    },
+    questionText: { fontSize: 28, fontWeight: 'bold', color: '#000', textAlign: 'center', marginBottom: 16 },
+    speakingIndicator: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, backgroundColor: '#E3F2FD', padding: 8, borderRadius: 8 },
+    speakingText: { marginLeft: 8, color: '#007AFF' },
+    repeatButton: { padding: 8 },
+    repeatButtonText: { color: '#007AFF', fontWeight: '600', fontSize: 16 },
+    optionsContainer: { gap: 16 },
+    optionButton: {
+        minHeight: 80, backgroundColor: 'white', borderRadius: 12, justifyContent: 'center', alignItems: 'center',
+        padding: 20, borderWidth: 2, borderColor: '#E0E0E0',
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2,
+    },
+    emergencyOptionWarning: { borderColor: '#E0E0E0' },
+    optionText: { fontSize: 24, fontWeight: '600', color: '#333', textAlign: 'center' },
+    processingContainer: { marginTop: 32, alignItems: 'center' },
+    processingText: { marginTop: 16, fontSize: 18, color: '#007AFF' },
+});
+
+export default BabyBreathingDecisionScreen;
