@@ -7,7 +7,7 @@ BirthGuide is a React Native application designed to provide step-by-step audio 
 **THIS APPLICATION IS FOR EMERGENCY USE ONLY.**
 
 It is NOT a substitute for professional medical care.
-- **Call 911 (or local emergency services) IMMEDIATELY** if possible.
+- **Call 101 (or local emergency services) IMMEDIATELY** if possible.
 - Use this app only when medical help is unavailable or delayed.
 - The developers assume no liability for outcomes resulting from the use of this app.
 

@@ -35,7 +35,7 @@ export const HEMORRHAGE_PROTOCOL: Protocol = {
         },
         {
             id: 'step_3',
-            instruction: 'اطلبي من شخص الاتصال بالطوارئ 911 فوراً',
+            instruction: 'اطلبي من شخص الاتصال بالطوارئ 101 فوراً',
             critical: true,
             requiresConfirmation: false,
         },
@@ -79,7 +79,7 @@ export const BREECH_PROTOCOL: Protocol = {
         },
         {
             id: 'step_4',
-            instruction: 'اطلبي من شخص الاتصال بالطوارئ 911 فوراً',
+            instruction: 'اطلبي من شخص الاتصال بالطوارئ 101 فوراً',
             critical: true,
             requiresConfirmation: false,
         },
@@ -129,7 +129,7 @@ export const CORD_PROLAPSE_PROTOCOL: Protocol = {
         },
         {
             id: 'step_5',
-            instruction: 'اطلبي من شخص الاتصال بالطوارئ 911 فوراً - هذه حالة طوارئ قصوى',
+            instruction: 'اطلبي من شخص الاتصال بالطوارئ 101 فوراً - هذه حالة طوارئ قصوى',
             critical: true,
             requiresConfirmation: false,
         },
@@ -173,7 +173,7 @@ export const RESUSCITATION_PROTOCOL: Protocol = {
         },
         {
             id: 'step_4',
-            instruction: 'اطلبي من شخص الاتصال بالطوارئ 911 فوراً',
+            instruction: 'اطلبي من شخص الاتصال بالطوارئ 101 فوراً',
             critical: true,
             requiresConfirmation: false,
         },
@@ -217,7 +217,7 @@ export const RETAINED_PLACENTA_PROTOCOL: Protocol = {
         },
         {
             id: 'step_4',
-            instruction: 'اطلبي من شخص الاتصال بالطوارئ 911',
+            instruction: 'اطلبي من شخص الاتصال بالطوارئ 101',
             critical: true,
             requiresConfirmation: false,
         },

@@ -230,9 +230,9 @@ const GuideScreen: React.FC = () => {
                 },
                 // Add more manual triggers if needed
                 {
-                    text: 'حالة أخرى (911)',
+                    text: 'حالة أخرى (101)',
                     style: 'destructive',
-                    onPress: () => Alert.alert('اتصلي بـ 911 فوراً')
+                    onPress: () => Alert.alert('اتصلي بـ 101 فوراً')
                 }
             ]
         );

@@ -146,7 +146,7 @@ const WelcomeScreen: React.FC = () => {
                         {'\n\n'}
                         <Text style={styles.disclaimerBold}>ليس بديلاً عن الرعاية الطبية:</Text>
                         {'\n'}
-                        • اتصلي بالطوارئ (911) فوراً إذا أمكن
+                        • اتصلي بالطوارئ (101) فوراً إذا أمكن
                         {'\n'}
                         • هذا التطبيق لا يحل محل القابلة أو الطبيب
                         {'\n'}
@@ -186,19 +186,19 @@ const WelcomeScreen: React.FC = () => {
                             [
                                 { text: 'إلغاء', style: 'cancel' },
                                 {
-                                    text: 'اتصل 911',
+                                    text: 'اتصل 101',
                                     style: 'destructive',
                                     onPress: () => {
                                         // TODO: Implement phone call
-                                        // Linking.openURL('tel:911');
-                                        Alert.alert('اتصلي بـ 911 من هاتفك');
+                                        // Linking.openURL('tel:101');
+                                        Alert.alert('اتصلي بـ 101 من هاتفك');
                                     },
                                 },
                             ]
                         );
                     }}
                 >
-                    <Text style={styles.emergencyButtonText}>📞 اتصلي بالطوارئ (911)</Text>
+                    <Text style={styles.emergencyButtonText}>📞 اتصلي بالطوارئ (101)</Text>
                 </TouchableOpacity>
 
                 {/* Scroll indicator */}
