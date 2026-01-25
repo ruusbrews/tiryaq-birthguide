@@ -41,7 +41,6 @@ export interface SpeechResult {
 }
 
 class VoiceService {
-    public readonly DEMO_VOICE_MODE = true; // Enabled for hands-free simulation
     private capabilities: VoiceCapabilities = {
         ttsAvailable: false,
         sttAvailable: false,
