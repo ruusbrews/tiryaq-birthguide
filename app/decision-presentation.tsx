@@ -26,6 +26,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import voiceService from '../services/voice';
+import demoVoiceService from '../services/demoVoice';
 import decisionTreeService from '../services/decisionTree';
 
 const PresentationDecisionScreen: React.FC = () => {
@@ -35,6 +36,8 @@ const PresentationDecisionScreen: React.FC = () => {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [voiceAvailable, setVoiceAvailable] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+    const [simulatedTranscript, setSimulatedTranscript] = useState<string | null>(null);
 
     // Question content
     const QUESTION_TEXT = 'ما الذي يظهر أولاً؟';
@@ -60,8 +63,32 @@ const PresentationDecisionScreen: React.FC = () => {
 
     const speakQuestion = async () => {
         setIsSpeaking(true);
-        await voiceService.speak(QUESTION_TEXT);
+        const result = await voiceService.speak(QUESTION_TEXT);
         setIsSpeaking(false);
+
+        // DEMO MODE: Start simulation after speech
+        if (voiceService.DEMO_VOICE_MODE && result.success) {
+            handleVoiceSimulation();
+        }
+    };
+
+    /**
+     * Handle simulated voice input (Demo Mode)
+     */
+    const handleVoiceSimulation = async () => {
+        setIsListening(true);
+        const result = await demoVoiceService.listenForAnswer('presentation');
+        setIsListening(false);
+
+        if (result && result.value !== null) {
+            setSimulatedTranscript(result.transcript);
+
+            // Wait a moment to show the transcript before proceeding
+            setTimeout(() => {
+                handleResponse(result.value);
+                setSimulatedTranscript(null);
+            }, 1000);
+        }
     };
 
     /**
@@ -124,6 +151,21 @@ const PresentationDecisionScreen: React.FC = () => {
                         >
                             <Text style={styles.repeatButtonText}>🔊 إعادة السؤال</Text>
                         </TouchableOpacity>
+                    )}
+
+                    {/* Listening Indicator (Demo Mode) */}
+                    {isListening && (
+                        <View style={styles.listeningIndicator}>
+                            <ActivityIndicator size="small" color="#FF3B30" />
+                            <Text style={styles.listeningText}>جاري الاستماع... (Demo)</Text>
+                        </View>
+                    )}
+
+                    {/* Simulated Transcript */}
+                    {simulatedTranscript && (
+                        <View style={styles.transcriptContainer}>
+                            <Text style={styles.transcriptText}>"{simulatedTranscript}"</Text>
+                        </View>
                     )}
                 </View>
 
@@ -204,6 +246,38 @@ const styles = StyleSheet.create({
         color: '#007AFF',
         fontWeight: '600',
         fontSize: 16,
+    },
+    listeningIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        backgroundColor: '#FFEBEE',
+        borderRadius: 8,
+        marginTop: 12,
+        borderWidth: 1,
+        borderColor: '#FFCDD2',
+    },
+    listeningText: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#D32F2F',
+        fontWeight: 'bold',
+    },
+    transcriptContainer: {
+        marginTop: 12,
+        padding: 12,
+        backgroundColor: '#F5F5F5',
+        borderRadius: 8,
+        alignItems: 'center',
+        borderStyle: 'dashed',
+        borderWidth: 1,
+        borderColor: '#999',
+    },
+    transcriptText: {
+        fontSize: 18,
+        fontStyle: 'italic',
+        color: '#333',
     },
     optionsContainer: {
         gap: 16,
