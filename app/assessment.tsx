@@ -30,6 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import voiceService from '../services/voice';
+import demoVoiceService from '../services/demoVoice';
 import decisionTreeService from '../services/decisionTree';
 
 // Assessment state storage key
@@ -82,6 +83,8 @@ const AssessmentScreen: React.FC = () => {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isInitializing, setIsInitializing] = useState(true);
+    const [isListening, setIsListening] = useState(false);
+    const [simulatedTranscript, setSimulatedTranscript] = useState<string | null>(null);
 
     /**
      * PRD Assessment Questions (VERBATIM from PRD Section 3)
@@ -143,8 +146,11 @@ const AssessmentScreen: React.FC = () => {
      * VOICE + BUTTON PARITY: Voice is optional, buttons always visible
      */
     useEffect(() => {
-        if (!isInitializing && voiceAvailable) {
-            speakCurrentQuestion();
+        if (!isInitializing) {
+            // Always show buttons, but speak if voice available
+            if (voiceAvailable) {
+                speakCurrentQuestion();
+            }
         }
     }, [currentQuestionIndex, isInitializing]);
 
@@ -187,6 +193,33 @@ const AssessmentScreen: React.FC = () => {
         // If TTS failed, user still sees text and buttons
         if (result.fallbackToText) {
             console.log('[Assessment] Voice unavailable, using buttons only');
+        }
+
+        // DEMO MODE: Start simulation after speech
+        if (voiceService.DEMO_VOICE_MODE) {
+            handleVoiceSimulation();
+        }
+    };
+
+    /**
+     * Handle simulated voice input (Demo Mode)
+     */
+    const handleVoiceSimulation = async () => {
+        const currentQuestion = questions[currentQuestionIndex];
+        if (!currentQuestion) return;
+
+        setIsListening(true);
+        const result = await demoVoiceService.listenForAnswer(currentQuestion.id);
+        setIsListening(false);
+
+        if (result && result.value !== null) {
+            setSimulatedTranscript(result.transcript);
+
+            // Wait a moment to show the transcript before proceeding
+            setTimeout(() => {
+                handleAnswerSelect(result.value);
+                setSimulatedTranscript(null);
+            }, 1000);
         }
     };
 
@@ -394,6 +427,21 @@ const AssessmentScreen: React.FC = () => {
                             <Text style={styles.repeatButtonText}>🔊 إعادة قراءة السؤال</Text>
                         </TouchableOpacity>
                     )}
+
+                    {/* Listening Indicator (Demo Mode) */}
+                    {isListening && (
+                        <View style={styles.listeningIndicator}>
+                            <ActivityIndicator size="small" color="#FF3B30" />
+                            <Text style={styles.listeningText}>جاري الاستماع... (Demo)</Text>
+                        </View>
+                    )}
+
+                    {/* Simulated Transcript */}
+                    {simulatedTranscript && (
+                        <View style={styles.transcriptContainer}>
+                            <Text style={styles.transcriptText}>"{simulatedTranscript}"</Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Answer Options */}
@@ -559,6 +607,38 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#007AFF',
         fontWeight: '500',
+    },
+    listeningIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        backgroundColor: '#FFEBEE',
+        borderRadius: 8,
+        marginTop: 12,
+        borderWidth: 1,
+        borderColor: '#FFCDD2',
+    },
+    listeningText: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#D32F2F',
+        fontWeight: 'bold',
+    },
+    transcriptContainer: {
+        marginTop: 12,
+        padding: 12,
+        backgroundColor: '#F5F5F5',
+        borderRadius: 8,
+        alignItems: 'center',
+        borderStyle: 'dashed',
+        borderWidth: 1,
+        borderColor: '#999',
+    },
+    transcriptText: {
+        fontSize: 18,
+        fontStyle: 'italic',
+        color: '#333',
     },
     optionsContainer: {
         gap: 16,

@@ -87,8 +87,10 @@ const EmergencyScreen: React.FC = () => {
             [
                 {
                     text: 'حسناً',
-                    onPress: () => {
-                        // Return to guidance screen or show post-emergency guidance
+                    onPress: async () => {
+                        // Clear emergency state to prevent redirect loop
+                        await decisionTreeService.clearEmergency();
+                        // Return to guidance screen
                         router.replace('/guide');
                     },
                 },
@@ -99,8 +101,9 @@ const EmergencyScreen: React.FC = () => {
     /**
      * Handle protocol exit (user confirmed exit)
      */
-    const handleProtocolExit = () => {
+    const handleProtocolExit = async () => {
         // User has confirmed exit from emergency protocol
+        await decisionTreeService.clearEmergency();
         // Return to guidance screen
         router.replace('/guide');
     };

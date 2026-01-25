@@ -450,6 +450,17 @@ class DecisionTreeService {
   }
 
   /**
+   * Clear emergency state (called when user completes or exits emergency flow)
+   */
+  async clearEmergency(): Promise<void> {
+    if (!this.state) return;
+
+    this.state.emergencyActive = false;
+    this.state.emergencyType = undefined;
+    await this.saveState();
+  }
+
+  /**
    * End current session and clear state
    */
   async endSession(): Promise<void> {
