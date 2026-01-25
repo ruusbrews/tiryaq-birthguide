@@ -17,7 +17,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // PRD Section 3: Labor stages
-export type LaborStage = 
+export type LaborStage =
   | 'early'       // Early labor
   | 'active'      // Active labor  
   | 'transition'  // Transition (not explicitly in PRD but implied)
@@ -26,7 +26,7 @@ export type LaborStage =
   | 'postpartum'; // After birth
 
 // PRD Section 3: 5 Critical Decision Point IDs
-export type DecisionId = 
+export type DecisionId =
   | 'presentation'    // Baby's position (head vs breech)
   | 'bleeding'        // Hemorrhage monitoring
   | 'crowning'        // Head progression
@@ -34,7 +34,7 @@ export type DecisionId =
   | 'placenta';       // Placenta delivery
 
 // PRD Section 3: Emergency protocol types
-export type EmergencyType = 
+export type EmergencyType =
   | 'hemorrhage'   // Severe bleeding
   | 'breech'       // Breech birth
   | 'cord_prolapse' // Cord/arm presentation
@@ -45,23 +45,24 @@ export type EmergencyType =
 export interface LaborState {
   // Current stage in labor progression
   stage: LaborStage;
-  
+
   // Initial assessment answers (PRD Section 3)
+  monthsPregnant: number;      // How many months pregnant
   contractionMinutes: number;  // Minutes between contractions
   waterBroken: boolean;        // Has water broken
   urgeToPush: boolean;         // Strong urge to push
-  
+
   // Decision tracking (PRD Section 3: "decisionsMade")
   decisionsMade: string[];     // Format: "decisionId:response"
-  
+
   // Emergency state (PRD Section 3)
   emergencyActive: boolean;    // If emergency triggered
   emergencyType?: EmergencyType; // Which emergency protocol
-  
+
   // Timestamps for time-based decisions
   birthTimestamp?: number;     // When baby was delivered (for placenta timing)
   laborStartTimestamp: number; // When labor guidance started
-  
+
   // Session tracking
   sessionId: string;           // Unique session identifier
   lastUpdated: number;         // Last state update timestamp
@@ -91,25 +92,28 @@ interface DecisionPoint {
 class DecisionTreeService {
   private state: LaborState | null = null;
   private readonly STORAGE_KEY = 'labor_state';
-  
+
   /**
    * Initialize a new labor session
    * PRD Section 3: Initial Assessment creates initial state
    */
   async initializeSession(
+    monthsPregnant: number,
     contractionMinutes: number,
     waterBroken: boolean,
     urgeToPush: boolean
   ): Promise<LaborState> {
     // Determine initial stage based on assessment (PRD Section 3)
     const initialStage = this.determineInitialStage(
+      monthsPregnant,
       contractionMinutes,
       waterBroken,
       urgeToPush
     );
-    
+
     this.state = {
       stage: initialStage,
+      monthsPregnant,
       contractionMinutes,
       waterBroken,
       urgeToPush,
@@ -119,16 +123,17 @@ class DecisionTreeService {
       sessionId: `session_${Date.now()}`,
       lastUpdated: Date.now()
     };
-    
+
     await this.saveState();
     return this.state;
   }
-  
+
   /**
    * Determine initial labor stage from assessment answers
    * PRD Section 3: Initial Assessment → [Determine Stage]
    */
   private determineInitialStage(
+    monthsPregnant: number,
     contractionMinutes: number,
     waterBroken: boolean,
     urgeToPush: boolean
@@ -137,22 +142,22 @@ class DecisionTreeService {
     if (urgeToPush) {
       return 'pushing';
     }
-    
+
     // PRD Section 3: "كم دقيقة بين الانقباضات؟"
     // 1-2 minutes = transition/pushing
     if (contractionMinutes <= 2) {
       return 'transition';
     }
-    
+
     // 3-5 minutes = active labor
     if (contractionMinutes <= 5) {
       return 'active';
     }
-    
+
     // >5 minutes = early labor
     return 'early';
   }
-  
+
   /**
    * Get the 5 Critical Decision Points (PRD Section 3)
    * Each decision has:
@@ -170,7 +175,7 @@ class DecisionTreeService {
         emergencyTriggers: ['مؤخرة', 'شيء آخر'],
         emergencyType: 'breech' // Note: 'شيء آخر' should be cord_prolapse, handled in response
       },
-      
+
       // Decision 2: Bleeding (PRD Section 3)
       {
         id: 'bleeding',
@@ -179,18 +184,18 @@ class DecisionTreeService {
         emergencyTriggers: ['شديد'],
         emergencyType: 'hemorrhage'
       },
-      
+
       // Decision 3: Crowning (PRD Section 3)
       {
         id: 'crowning',
-        condition: (state) => 
-          state.stage === 'pushing' && 
+        condition: (state) =>
+          state.stage === 'pushing' &&
           this.hasDecisionResponse(state, 'presentation', 'رأس'),
         // PRD: "لا" → "Head stuck" → Position change protocol
         emergencyTriggers: ['لا'],
         // Note: Not a full emergency, but requires intervention
       },
-      
+
       // Decision 4: Baby Breathing (PRD Section 3)
       {
         id: 'baby_breathing',
@@ -199,7 +204,7 @@ class DecisionTreeService {
         emergencyTriggers: ['لا'],
         emergencyType: 'resuscitation'
       },
-      
+
       // Decision 5: Placenta (PRD Section 3)
       {
         id: 'placenta',
@@ -210,7 +215,7 @@ class DecisionTreeService {
       }
     ];
   }
-  
+
   /**
    * Determine next action based on current state
    * PRD Section 4: determineNextAction()
@@ -222,7 +227,7 @@ class DecisionTreeService {
         throw new Error('No active labor session. Call initializeSession first.');
       }
     }
-    
+
     // PRD Section 3: [Emergency Detected] → Trigger emergency protocol
     // PRD: "Emergency escalation is irreversible once triggered"
     if (this.state.emergencyActive) {
@@ -233,7 +238,7 @@ class DecisionTreeService {
         }
       };
     }
-    
+
     // PRD Section 3: [5 Critical Decision Points] → Binary questions
     const nextDecision = this.getNextCriticalDecision();
     if (nextDecision) {
@@ -244,7 +249,7 @@ class DecisionTreeService {
         }
       };
     }
-    
+
     // PRD Section 3: [Normal Progress] → Stage-specific guidance
     return {
       action: 'guide',
@@ -253,51 +258,51 @@ class DecisionTreeService {
       }
     };
   }
-  
+
   /**
    * Get next unanswered critical decision
    * PRD Section 4: getNextCriticalDecision()
    */
   private getNextCriticalDecision(): DecisionPoint | null {
     if (!this.state) return null;
-    
+
     const decisions = this.getDecisionPoints();
-    
+
     // Find first decision that:
     // 1. Meets its condition
     // 2. Hasn't been asked yet
-    return decisions.find(d => 
-      d.condition(this.state!) && 
+    return decisions.find(d =>
+      d.condition(this.state!) &&
       !this.hasDecisionBeenMade(this.state!, d.id)
     ) || null;
   }
-  
+
   /**
    * Handle user response to a decision point
    * PRD Section 4: handleDecisionResponse()
    */
   async handleDecisionResponse(
-    decisionId: DecisionId, 
+    decisionId: DecisionId,
     response: string
   ): Promise<void> {
     if (!this.state) {
       throw new Error('No active labor session');
     }
-    
+
     // Record decision (PRD Section 4: "decisionId:response" format)
     this.state.decisionsMade.push(`${decisionId}:${response}`);
     this.state.lastUpdated = Date.now();
-    
+
     // Check if this response triggers emergency
     const decision = this.getDecisionPoints().find(d => d.id === decisionId);
-    
+
     if (decision && decision.emergencyTriggers.includes(response)) {
       // Special case: "شيء آخر" triggers cord prolapse, not breech
-      const emergencyType = 
-        decisionId === 'presentation' && response === 'شيء آخر' 
-          ? 'cord_prolapse' 
+      const emergencyType =
+        decisionId === 'presentation' && response === 'شيء آخر'
+          ? 'cord_prolapse'
           : decision.emergencyType;
-      
+
       // Special case: Placenta emergency only if >60 minutes
       if (decisionId === 'placenta' && response === 'لا') {
         const minutesSinceBirth = this.getMinutesSinceBirth();
@@ -308,21 +313,21 @@ class DecisionTreeService {
           return;
         }
       }
-      
+
       // PRD Section 3: Emergency escalation
       // Once triggered, emergencyActive remains true (irreversible)
       this.state.emergencyActive = true;
       this.state.emergencyType = emergencyType;
-      
+
       await this.saveState();
       return;
     }
-    
+
     // Update stage based on decision responses
     await this.updateStageProgression(decisionId, response);
     await this.saveState();
   }
-  
+
   /**
    * Update labor stage based on decision responses
    * PRD Section 3: Stage progression through labor
@@ -332,7 +337,7 @@ class DecisionTreeService {
     response: string
   ): Promise<void> {
     if (!this.state) return;
-    
+
     // PRD Section 3: Stage transitions
     switch (decisionId) {
       case 'baby_breathing':
@@ -342,14 +347,14 @@ class DecisionTreeService {
           this.state.birthTimestamp = Date.now();
         }
         break;
-        
+
       case 'placenta':
         if (response === 'نعم') {
           // Placenta delivered = postpartum complete
           // State remains 'postpartum' but guidance changes
         }
         break;
-        
+
       case 'presentation':
         if (response === 'رأس') {
           // Normal presentation, continue pushing
@@ -357,10 +362,10 @@ class DecisionTreeService {
         }
         break;
     }
-    
+
     this.state.lastUpdated = Date.now();
   }
-  
+
   /**
    * Manually advance to next stage (for user-reported progression)
    */
@@ -368,7 +373,7 @@ class DecisionTreeService {
     if (!this.state) {
       throw new Error('No active labor session');
     }
-    
+
     // Validate stage progression (can only move forward)
     const validTransitions: Record<LaborStage, LaborStage[]> = {
       early: ['active', 'transition', 'pushing'],
@@ -378,22 +383,22 @@ class DecisionTreeService {
       birth: ['postpartum'],
       postpartum: []
     };
-    
+
     if (!validTransitions[this.state.stage].includes(newStage)) {
       throw new Error(`Invalid stage transition: ${this.state.stage} → ${newStage}`);
     }
-    
+
     this.state.stage = newStage;
-    
+
     // Track birth timestamp for placenta timing
     if (newStage === 'birth') {
       this.state.birthTimestamp = Date.now();
     }
-    
+
     this.state.lastUpdated = Date.now();
     await this.saveState();
   }
-  
+
   /**
    * Get current labor state (read-only)
    */
@@ -403,25 +408,25 @@ class DecisionTreeService {
     }
     return this.state;
   }
-  
+
   /**
    * Check if a specific decision has been made
    */
   private hasDecisionBeenMade(state: LaborState, decisionId: DecisionId): boolean {
     return state.decisionsMade.some(d => d.startsWith(`${decisionId}:`));
   }
-  
+
   /**
    * Check if a decision has a specific response
    */
   private hasDecisionResponse(
-    state: LaborState, 
-    decisionId: DecisionId, 
+    state: LaborState,
+    decisionId: DecisionId,
     response: string
   ): boolean {
     return state.decisionsMade.includes(`${decisionId}:${response}`);
   }
-  
+
   /**
    * Get minutes elapsed since baby was born
    * Used for placenta emergency timing (PRD: >60min = emergency)
@@ -430,20 +435,20 @@ class DecisionTreeService {
     if (!this.state?.birthTimestamp) return 0;
     return Math.floor((Date.now() - this.state.birthTimestamp) / 60000);
   }
-  
+
   /**
    * Reset emergency state (for testing only - NOT used in production)
    * PRD: "Emergency escalation is irreversible once triggered"
    */
   async resetEmergency(): Promise<void> {
     if (!this.state) return;
-    
+
     console.warn('resetEmergency() called - this should only be used for testing');
     this.state.emergencyActive = false;
     this.state.emergencyType = undefined;
     await this.saveState();
   }
-  
+
   /**
    * End current session and clear state
    */
@@ -451,14 +456,14 @@ class DecisionTreeService {
     this.state = null;
     await AsyncStorage.removeItem(this.STORAGE_KEY);
   }
-  
+
   /**
    * Persist state to local storage
    * PRD Section 4: Offline Architecture - state persistence
    */
   private async saveState(): Promise<void> {
     if (!this.state) return;
-    
+
     try {
       await AsyncStorage.setItem(
         this.STORAGE_KEY,
@@ -469,7 +474,7 @@ class DecisionTreeService {
       throw new Error('State persistence failed');
     }
   }
-  
+
   /**
    * Load state from local storage
    * PRD Section 4: "app restart scenarios"

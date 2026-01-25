@@ -53,6 +53,7 @@ interface AssessmentOption {
 interface AssessmentState {
     currentQuestionIndex: number;
     answers: {
+        monthsPregnant?: number;
         contractionMinutes?: number;
         waterBroken?: boolean;
         urgeToPush?: boolean;
@@ -86,6 +87,17 @@ const AssessmentScreen: React.FC = () => {
      * PRD Assessment Questions (VERBATIM from PRD Section 3)
      */
     const questions: AssessmentQuestion[] = [
+        {
+            id: 0,
+            questionText: 'في أي شهر من الحمل أنتِ؟',
+            type: 'single',
+            options: [
+                { label: 'أقل من 7 أشهر', value: 6 },
+                { label: 'الشهر السابع', value: 7 },
+                { label: 'الشهر الثامن', value: 8 },
+                { label: 'الشهر التاسع', value: 9 },
+            ],
+        },
         {
             id: 1,
             questionText: 'كم دقيقة بين الانقباضات؟',
@@ -192,6 +204,9 @@ const AssessmentScreen: React.FC = () => {
         const currentQuestion = questions[currentQuestionIndex];
 
         switch (currentQuestion.id) {
+            case 0:
+                newAnswers.monthsPregnant = value as number;
+                break;
             case 1:
                 newAnswers.contractionMinutes = value as number;
                 break;
@@ -223,6 +238,7 @@ const AssessmentScreen: React.FC = () => {
      */
     const completeAssessment = async (finalAnswers: AssessmentState['answers']) => {
         if (
+            finalAnswers.monthsPregnant === undefined ||
             finalAnswers.contractionMinutes === undefined ||
             finalAnswers.waterBroken === undefined ||
             finalAnswers.urgeToPush === undefined
@@ -236,6 +252,7 @@ const AssessmentScreen: React.FC = () => {
         try {
             // Initialize decision tree session with assessment answers
             await decisionTreeService.initializeSession(
+                finalAnswers.monthsPregnant,
                 finalAnswers.contractionMinutes,
                 finalAnswers.waterBroken,
                 finalAnswers.urgeToPush
@@ -389,11 +406,13 @@ const AssessmentScreen: React.FC = () => {
                                 styles.optionButton,
                                 // Highlight selected answer
                                 answers[
-                                currentQuestion.id === 1
-                                    ? 'contractionMinutes'
-                                    : currentQuestion.id === 2
-                                        ? 'waterBroken'
-                                        : 'urgeToPush'
+                                currentQuestion.id === 0
+                                    ? 'monthsPregnant'
+                                    : currentQuestion.id === 1
+                                        ? 'contractionMinutes'
+                                        : currentQuestion.id === 2
+                                            ? 'waterBroken'
+                                            : 'urgeToPush'
                                 ] === option.value && styles.optionButtonSelected,
                             ]}
                             onPress={() => handleAnswerSelect(option.value)}
@@ -403,11 +422,13 @@ const AssessmentScreen: React.FC = () => {
                                 style={[
                                     styles.optionText,
                                     answers[
-                                    currentQuestion.id === 1
-                                        ? 'contractionMinutes'
-                                        : currentQuestion.id === 2
-                                            ? 'waterBroken'
-                                            : 'urgeToPush'
+                                    currentQuestion.id === 0
+                                        ? 'monthsPregnant'
+                                        : currentQuestion.id === 1
+                                            ? 'contractionMinutes'
+                                            : currentQuestion.id === 2
+                                                ? 'waterBroken'
+                                                : 'urgeToPush'
                                     ] === option.value && styles.optionTextSelected,
                                 ]}
                             >
