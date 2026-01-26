@@ -6,6 +6,7 @@ import { ScreenContainer } from '../components/ScreenContainer';
 import { VoiceButton } from '../components/VoiceButton';
 import { HomeButton } from '../components/HomeButton';
 import { voiceService } from '../services/VoiceService';
+import { voiceInputService } from '../services/VoiceInputService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Question {
@@ -68,10 +69,35 @@ export default function AssessmentScreen() {
     const progress = (currentQuestionIndex + 1) / QUESTIONS.length;
 
     useEffect(() => {
-        voiceService.speak(question.voice);
+        voiceService.speak(question.voice, () => {
+            // Start listening after question is finished speaking
+            voiceInputService.startListening(handleVoiceTranscript);
+        });
+
+        return () => {
+            voiceInputService.stopListening();
+        };
     }, [question]);
 
+    const handleVoiceTranscript = (text: string) => {
+        console.log('Assessment Voice Transcript:', text);
+
+        // Match transcript to options based on keywords
+        const matchedOption = question.options.find(option =>
+            option.keywords.some(keyword => text.includes(keyword))
+        );
+
+        if (matchedOption) {
+            handleAnswer(matchedOption.value);
+        } else {
+            // If no match, maybe repeat or just wait? 
+            // For now, let's just log and keep listening if it wasn't a stop
+            console.log('No match for:', text);
+        }
+    };
+
     const handleAnswer = async (value: any) => {
+        voiceInputService.stopListening();
         const newAnswers = { ...answers, [question.id]: value };
         setAnswers(newAnswers);
 

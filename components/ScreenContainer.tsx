@@ -3,6 +3,9 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
 
+import { voiceInputService } from '../services/VoiceInputService';
+import { ListeningIndicator } from './ListeningIndicator';
+
 interface ScreenContainerProps {
     children: React.ReactNode;
     style?: any;
@@ -15,6 +18,12 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
     scrollable = true
 }) => {
     const theme = useTheme();
+    const [isListening, setIsListening] = React.useState(voiceInputService.getIsListening());
+
+    React.useEffect(() => {
+        const unsubscribe = voiceInputService.subscribe(setIsListening);
+        return () => { unsubscribe(); };
+    }, []);
 
     const Content = (
         <View style={[styles.content, style]}>
@@ -31,6 +40,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
             ) : (
                 Content
             )}
+            <ListeningIndicator visible={isListening} />
         </SafeAreaView>
     );
 };

@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { ScreenContainer } from './ScreenContainer';
 import { VoiceButton } from './VoiceButton';
 import { voiceService } from '../services/VoiceService';
+import { voiceInputService } from '../services/VoiceInputService';
 import { Protocol } from '../data/protocols';
 
 interface ProtocolViewerProps {
@@ -19,10 +20,34 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
 
     useEffect(() => {
         // Speak the step instructions automatically when step changes
-        voiceService.speak(step.voice);
+        voiceService.speak(step.voice, () => {
+            // Start listening after step is finished speaking
+            voiceInputService.startListening(handleVoiceTranscript);
+        });
+
+        return () => {
+            voiceInputService.stopListening();
+        };
     }, [step]);
 
+    const handleVoiceTranscript = (text: string) => {
+        console.log('Protocol Voice Transcript:', text);
+
+        // Keywords for "next" or "done" in Arabic
+        const nextKeywords = [
+            'تم', 'خلصت', 'انتهيت', 'نعم', 'أيوة', 'التالي', 'بعده',
+            'موافق', 'حاضر', 'تمام', 'ماشي', 'خلاص', 'done', 'finished', 'next'
+        ];
+
+        if (nextKeywords.some(keyword => text.includes(keyword))) {
+            handleNext();
+        } else {
+            console.log('No match for protocol action:', text);
+        }
+    };
+
     const handleNext = () => {
+        voiceInputService.stopListening();
         if (currentStepIndex < protocol.steps.length - 1) {
             setCurrentStepIndex(currentStepIndex + 1);
         } else {

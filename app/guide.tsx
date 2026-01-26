@@ -7,6 +7,7 @@ import { VoiceButton } from '../components/VoiceButton';
 import { DangerButton } from '../components/DangerButton';
 import { HomeButton } from '../components/HomeButton';
 import { voiceService } from '../services/VoiceService';
+import { voiceInputService } from '../services/VoiceInputService';
 import { LABOR_STAGES } from '../data/stages';
 import { CRITICAL_DECISIONS, DecisionPoint } from '../data/decisions';
 
@@ -19,12 +20,48 @@ export default function GuideScreen() {
     const currentStage = LABOR_STAGES[currentStageId];
 
     useEffect(() => {
-        if (currentStage) {
-            voiceService.speak(currentStage.voiceInstructions.join('. '));
+        if (currentStage && !activeDecision) {
+            voiceService.speak(currentStage.voiceInstructions.join('. ') + '. ' + currentStage.nextActionVoice, () => {
+                voiceInputService.startListening(handleVoiceTranscript);
+            });
         }
-    }, [currentStageId]);
+
+        return () => {
+            voiceInputService.stopListening();
+        };
+    }, [currentStageId, activeDecision]);
+
+    const handleVoiceTranscript = (text: string) => {
+        console.log('Guide Voice Transcript:', text);
+
+        if (activeDecision) {
+            // Match decision options
+            const matchedOption = activeDecision.options.find(option => {
+                // We'll use a simple heuristic for these options as they don't have explicit keywords in decisions.ts
+                // but we can match by label or common Arabic equivalents
+                const keywords = [option.label, option.value];
+                if (option.value === 'head') keywords.push('رأس', 'راس');
+                if (option.value === 'breech') keywords.push('مؤخرة', 'رجل', 'قدم');
+                if (option.value === 'yes') keywords.push('نعم', 'ايوه', 'صح');
+                if (option.value === 'no') keywords.push('لا', 'لأ');
+
+                return keywords.some(k => typeof k === 'string' && text.includes(k));
+            });
+
+            if (matchedOption) {
+                handleDecisionAnswer(matchedOption.value, matchedOption.emergency);
+            }
+        } else {
+            // Handle "Next" action
+            const nextKeywords = ['التالي', 'بعده', 'خلصت', 'تم', 'تمام', 'ماشي', 'خلاص', 'next', 'done'];
+            if (nextKeywords.some(k => text.includes(k))) {
+                handleNextAction();
+            }
+        }
+    };
 
     const handleNextAction = () => {
+        voiceInputService.stopListening();
         if (currentStageId === 'early') {
             setCurrentStageId('active');
         } else if (currentStageId === 'active') {
@@ -37,12 +74,16 @@ export default function GuideScreen() {
     const triggerDecision = (decisionId: string) => {
         const decision = CRITICAL_DECISIONS.find(d => d.id === decisionId);
         if (decision) {
+            voiceInputService.stopListening();
             setActiveDecision(decision);
-            voiceService.speak(decision.voice);
+            voiceService.speak(decision.voice, () => {
+                voiceInputService.startListening(handleVoiceTranscript);
+            });
         }
     };
 
     const handleDecisionAnswer = (value: string, emergency?: string) => {
+        voiceInputService.stopListening();
         if (emergency) {
             voiceService.speak("حالة طارئة! جاري تفعيل البروتوكول.");
             router.push(`/emergency/${emergency}`);

@@ -28,7 +28,11 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="assessment" />
         <Stack.Screen name="guide" />
-        <Stack.Screen name="emergency" />
+        <Stack.Screen name="emergency/index" />
+        <Stack.Screen name="emergency/[id]" />
+        <Stack.Screen name="camera" />
+        <Stack.Screen name="postpartum" />
+        <Stack.Screen name="references" />
       </Stack>
     </PaperProvider>
   );

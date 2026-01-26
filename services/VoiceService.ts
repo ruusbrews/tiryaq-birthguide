@@ -33,11 +33,13 @@ class VoiceService {
                 onError: (e) => {
                     console.error("TTS Error", e);
                     this.isSpeaking = false;
+                    if (onDone) onDone();
                 }
             });
         } catch (error) {
             console.error('Speech error:', error);
             this.isSpeaking = false;
+            if (onDone) onDone();
         }
     }
 
