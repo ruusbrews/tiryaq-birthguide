@@ -7,6 +7,7 @@ import { VoiceButton } from './VoiceButton';
 import { voiceService } from '../services/VoiceService';
 import { voiceInputService } from '../services/VoiceInputService';
 import { Protocol } from '../data/protocols';
+import { BREECH_IMAGES } from '../data/breechImages';
 
 interface ProtocolViewerProps {
     protocol: Protocol;
@@ -19,9 +20,7 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
     const progress = (currentStepIndex + 1) / protocol.steps.length;
 
     useEffect(() => {
-        // Speak the step instructions automatically when step changes
         voiceService.speak(step.voice, () => {
-            // Start listening after step is finished speaking
             voiceInputService.startListening(handleVoiceTranscript);
         });
 
@@ -33,9 +32,8 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
     const handleVoiceTranscript = (text: string) => {
         console.log('Protocol Voice Transcript:', text);
 
-        // Keywords for "next" or "done" in Arabic
         const nextKeywords = [
-            'تم', 'خلصت', 'انتهيت', 'نعم', 'أيوة', 'التالي', 'بعده',
+            'تم', 'خلصت', 'انتهيت', 'نعم', 'أيوه', 'التالي', 'بعده',
             'موافق', 'حاضر', 'تمام', 'ماشي', 'خلاص', 'done', 'finished', 'next'
         ];
 
@@ -51,7 +49,6 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
         if (currentStepIndex < protocol.steps.length - 1) {
             setCurrentStepIndex(currentStepIndex + 1);
         } else {
-            // Protocol complete
             voiceService.speak("تم الانتهاء من البروتوكول. هل تحتاجين مساعدة أخرى؟");
             router.back();
         }
@@ -66,6 +63,11 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
     const handleRepeat = () => {
         voiceService.speak(step.voice);
     };
+
+    // Only load images for breech protocol
+    const imageSource = protocol.id === 'breech' && step.id 
+        ? BREECH_IMAGES[step.id] 
+        : null;
 
     return (
         <ScreenContainer>
@@ -94,6 +96,17 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
                     )}
                 </Card.Content>
             </Card>
+
+            {/* Image Display - In the central empty space between card and buttons */}
+            {imageSource && (
+                <View style={styles.imageContainer}>
+                    <Image 
+                        source={imageSource} 
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
+                </View>
+            )}
 
             <View style={styles.spacer} />
 
@@ -150,7 +163,7 @@ const styles = StyleSheet.create({
     instruction: {
         fontWeight: 'bold',
         lineHeight: 32,
-        textAlign: 'right', // Arabic alignment
+        textAlign: 'right',
         marginBottom: 16,
     },
     warningContainer: {
@@ -164,8 +177,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'right',
     },
+    imageContainer: {
+        flex: 1,  // Takes available space
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 16,
+    },
+    image: {
+        width: '90%',
+        height: '100%',
+        maxHeight: 300,
+    },
     spacer: {
-        flex: 1,
+        height: 20,  // Small fixed spacer instead of flex
     },
     controls: {
         flexDirection: 'row',

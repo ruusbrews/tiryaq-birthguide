@@ -1,3 +1,5 @@
+// postpartum.tsx - Postpartum screen with green theme
+
 import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, List, Checkbox } from 'react-native-paper';
@@ -74,7 +76,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: 'bold',
-        color: '#E57373',
+        color: '#45AC8B', // Green instead of red
         marginBottom: 4,
     },
     subtitle: {

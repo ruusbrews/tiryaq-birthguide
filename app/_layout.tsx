@@ -1,17 +1,19 @@
+// _layout.tsx - Updated with soothing green theme
+
 import { Stack } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 
-// Custom theme with calming colors
+// Custom theme with calming green colors (non-emergency screens)
 const theme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
-    primary: '#E57373', // Calming red/pink
-    secondary: '#81C784', // Calming green
-    background: '#FFF5F5', // Very light pink background
+    primary: '#45AC8B', // Soothing green
+    secondary: '#81C784', // Light green
+    background: '#F5FFFA', // Very light mint background
     surface: '#FFFFFF',
-    error: '#D32F2F',
+    error: '#D32F2F', // Keep red for errors
   },
 };
 
