@@ -1,3 +1,5 @@
+// assessment.tsx - Assessment screen with green theme and helper note
+
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, ProgressBar, IconButton } from 'react-native-paper';
@@ -70,7 +72,6 @@ export default function AssessmentScreen() {
 
     useEffect(() => {
         voiceService.speak(question.voice, () => {
-            // Start listening after question is finished speaking
             voiceInputService.startListening(handleVoiceTranscript);
         });
 
@@ -82,7 +83,6 @@ export default function AssessmentScreen() {
     const handleVoiceTranscript = (text: string) => {
         console.log('Assessment Voice Transcript:', text);
 
-        // Match transcript to options based on keywords
         const matchedOption = question.options.find(option =>
             option.keywords.some(keyword => text.includes(keyword))
         );
@@ -90,8 +90,6 @@ export default function AssessmentScreen() {
         if (matchedOption) {
             handleAnswer(matchedOption.value);
         } else {
-            // If no match, maybe repeat or just wait? 
-            // For now, let's just log and keep listening if it wasn't a stop
             console.log('No match for:', text);
         }
     };
@@ -132,7 +130,7 @@ export default function AssessmentScreen() {
 
             <View style={styles.header}>
                 <Text variant="headlineSmall" style={styles.title}>التقييم الأولي</Text>
-                <ProgressBar progress={progress} color="#E57373" style={styles.progress} />
+                <ProgressBar progress={progress} color="#45AC8B" style={styles.progress} />
             </View>
 
             <View style={styles.questionContainer}>
@@ -151,6 +149,11 @@ export default function AssessmentScreen() {
                         style={styles.optionButton}
                     />
                 ))}
+            </View>
+
+            {/* Helper Note */}
+            <View style={styles.helperNote}>
+                <Text style={styles.helperText}>💡 يمكنك التحدث أو الضغط للإجابة</Text>
             </View>
         </ScreenContainer>
     );
@@ -184,9 +187,19 @@ const styles = StyleSheet.create({
     },
     options: {
         gap: 16,
-        marginBottom: 20,
+        marginBottom: 12,
     },
     optionButton: {
         paddingVertical: 4,
+    },
+    helperNote: {
+        alignItems: 'center',
+        marginBottom: 20,
+        marginTop: 8,
+    },
+    helperText: {
+        fontSize: 13,
+        color: '#45AC8B',
+        fontStyle: 'italic',
     },
 });

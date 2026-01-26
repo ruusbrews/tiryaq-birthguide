@@ -1,3 +1,5 @@
+// guide.tsx - Guide screen with green theme and helper note
+
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Card } from 'react-native-paper';
@@ -35,10 +37,7 @@ export default function GuideScreen() {
         console.log('Guide Voice Transcript:', text);
 
         if (activeDecision) {
-            // Match decision options
             const matchedOption = activeDecision.options.find(option => {
-                // We'll use a simple heuristic for these options as they don't have explicit keywords in decisions.ts
-                // but we can match by label or common Arabic equivalents
                 const keywords = [option.label, option.value];
                 if (option.value === 'head') keywords.push('رأس', 'راس');
                 if (option.value === 'breech') keywords.push('مؤخرة', 'رجل', 'قدم');
@@ -52,7 +51,6 @@ export default function GuideScreen() {
                 handleDecisionAnswer(matchedOption.value, matchedOption.emergency);
             }
         } else {
-            // Handle "Next" action
             const nextKeywords = ['التالي', 'بعده', 'خلصت', 'تم', 'تمام', 'ماشي', 'خلاص', 'next', 'done'];
             if (nextKeywords.some(k => text.includes(k))) {
                 handleNextAction();
@@ -135,6 +133,11 @@ export default function GuideScreen() {
                         />
                     ))}
                 </View>
+
+                {/* Helper Note for Decisions */}
+                <View style={styles.helperNote}>
+                    <Text style={styles.helperText}>💡 يمكنك التحدث أو الضغط للإجابة</Text>
+                </View>
             </ScreenContainer>
         );
     }
@@ -175,6 +178,11 @@ export default function GuideScreen() {
             />
 
             <Text style={styles.nextHint}>{currentStage.nextAction}</Text>
+
+            {/* Helper Note */}
+            <View style={styles.helperNote}>
+                <Text style={styles.helperText}>💡 يمكنك التحدث أو الضغط للمتابعة</Text>
+            </View>
         </ScreenContainer>
     );
 }
@@ -187,7 +195,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: 'bold',
-        color: '#E57373',
+        color: '#45AC8B', // Green instead of red
     },
     card: {
         marginBottom: 20,
@@ -213,7 +221,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#666',
         fontSize: 12,
-        marginBottom: 20,
+        marginBottom: 8,
     },
     decisionTitle: {
         color: '#D32F2F',
@@ -227,6 +235,7 @@ const styles = StyleSheet.create({
     },
     options: {
         gap: 16,
+        marginBottom: 12,
     },
     optionButton: {
         paddingVertical: 8,
@@ -234,5 +243,15 @@ const styles = StyleSheet.create({
     emergencyOption: {
         backgroundColor: '#D32F2F',
         paddingVertical: 8,
+    },
+    helperNote: {
+        alignItems: 'center',
+        marginBottom: 16,
+        marginTop: 4,
+    },
+    helperText: {
+        fontSize: 13,
+        color: '#45AC8B',
+        fontStyle: 'italic',
     },
 });

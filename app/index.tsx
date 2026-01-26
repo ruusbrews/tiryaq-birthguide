@@ -1,3 +1,5 @@
+// index.tsx - Welcome screen with green theme
+
 import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Card, Button } from 'react-native-paper';
@@ -70,7 +72,7 @@ export default function WelcomeScreen() {
             <Button
                 mode="text"
                 onPress={() => router.push('/postpartum')}
-                textColor="#E57373"
+                textColor="#45AC8B"
                 style={styles.refButton}
             >
                 ما بعد الولادة / Postpartum Care
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: 'bold',
-        color: '#E57373',
+        color: '#45AC8B', // Green instead of red
         marginBottom: 8,
     },
     subtitle: {

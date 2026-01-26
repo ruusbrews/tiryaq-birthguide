@@ -1,3 +1,5 @@
+// HomeButton.tsx - Updated with green color
+
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { IconButton } from 'react-native-paper';
@@ -14,7 +16,7 @@ export const HomeButton: React.FC = () => {
         <IconButton
             icon="home"
             size={28}
-            iconColor="#E57373"
+            iconColor="#45AC8B" // Green instead of red
             style={styles.button}
             onPress={handlePress}
         />
