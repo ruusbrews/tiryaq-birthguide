@@ -1,10 +1,11 @@
+import Constants from 'expo-constants';
 import { Audio } from 'expo-av';
 
 class VoiceInputService {
     private recording: Audio.Recording | null = null;
     private isListening = false;
     private onTranscriptCallback: ((text: string) => void) | null = null;
-    private FANAR_API_KEY = 'ixVmNEbLwpwW9PjfJpPn1cG8HCFhZA2L';
+    private FANAR_API_KEY = Constants.expoConfig?.extra?.fanarApiKey || '';
     private FANAR_API_URL = 'https://api.fanar.qa/v1/audio/transcriptions';
     private stopTimeout: any = null;
     private subscribers: Set<(state: boolean) => void> = new Set();
