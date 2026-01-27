@@ -110,6 +110,12 @@ npx expo start --android
 
 ---
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
 ## Some Troubleshooting Guidelines (if needed)
 
 ### Issue: Voice Recognition Shows "Rate Limit Reached" or API Error
@@ -233,12 +239,6 @@ npx expo start --clear
 - **Fanar AI**: Arabic Speech-to-Text API for hands-free interaction
 - **Expo**: React Native development platform
 - **React Native Paper**: Material Design UI components
-
----
-
-## License
-
-MIT License
 
 ---
 
