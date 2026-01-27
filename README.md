@@ -66,7 +66,7 @@ You should see a QR code in your terminal.
 #### Step 5: Run on Your Device
 
 **On Mobile Device:**
-1. **Android**: Download the Expo Go app and scan the QR code from the terminal.
+1. **Android**: Use the Expo Go app and scan the QR code from the terminal.
    **iOS**: Use the Camera app to scan the QR code on your terminal.
 2. The app will load on your device
 
