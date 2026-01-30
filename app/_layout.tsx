@@ -36,6 +36,13 @@ export default function RootLayout() {
         <Stack.Screen name="postpartum" />
         <Stack.Screen name="references" />
         <Stack.Screen name="screens/HealthTrackingScreen" />
+        <Stack.Screen name="screens/forms/IdentificationFormScreen" />
+        <Stack.Screen name="screens/forms/PregnancyStatusFormScreen" />
+        <Stack.Screen name="screens/forms/AntenatalCareFormScreen" />
+        <Stack.Screen name="screens/forms/LivingConditionsFormScreen" />
+        <Stack.Screen name="screens/forms/MentalHealthFormScreen" />
+        <Stack.Screen name="screens/forms/ConsentFormScreen" />
+        <Stack.Screen name="screens/forms/SubmitRecordsScreen" />
       </Stack>
     </PaperProvider>
   );
