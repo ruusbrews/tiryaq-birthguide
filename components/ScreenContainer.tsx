@@ -19,12 +19,6 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
     scrollable = true
 }) => {
     const theme = useTheme();
-    const [isListening, setIsListening] = React.useState(voiceInputService.getIsListening());
-
-    React.useEffect(() => {
-        const unsubscribe = voiceInputService.subscribe(setIsListening);
-        return () => { unsubscribe(); };
-    }, []);
 
     const Content = (
         <View style={[styles.content, style]}>
@@ -42,7 +36,6 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
                 Content
             )}
             <VoiceToggle />
-            <ListeningIndicator visible={isListening} />
         </SafeAreaView>
     );
 };

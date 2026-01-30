@@ -5,9 +5,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface ListeningIndicatorProps {
     visible: boolean;
+    transcribing?: boolean;
+    transcription?: string;
+    style?: any;
 }
 
-export const ListeningIndicator: React.FC<ListeningIndicatorProps> = ({ visible }) => {
+export const ListeningIndicator: React.FC<ListeningIndicatorProps> = ({ visible, transcribing, transcription, style }) => {
     const pulseAnim = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
@@ -31,46 +34,81 @@ export const ListeningIndicator: React.FC<ListeningIndicatorProps> = ({ visible 
         }
     }, [visible, pulseAnim]);
 
-    if (!visible) return null;
+    if (!visible && !transcribing && !transcription) return null;
 
     return (
-        <View style={styles.overlay}>
-            <Surface style={styles.container} elevation={4}>
-                <Animated.View style={[styles.pulseCircle, { transform: [{ scale: pulseAnim }] }]}>
-                    <MaterialCommunityIcons name="microphone" size={32} color="#FFF" />
-                </Animated.View>
-                <Text style={styles.text}>جاري الاستماع...</Text>
+        <View style={[styles.wrapper, style]}>
+            <Surface style={styles.container} elevation={2}>
+                <View style={styles.content}>
+                    {(visible || transcribing) && (
+                        <Animated.View style={[styles.micCircle, { transform: [{ scale: pulseAnim }], backgroundColor: transcribing ? '#45AC8B' : '#E57373' }]}>
+                            {transcribing ? (
+                                <MaterialCommunityIcons name="cached" size={20} color="#FFF" />
+                            ) : (
+                                <MaterialCommunityIcons name="microphone" size={20} color="#FFF" />
+                            )}
+                        </Animated.View>
+                    )}
+                    <View style={styles.textContainer}>
+                        {transcription ? (
+                            <Text variant="bodyLarge" style={styles.transcriptionText}>{transcription}</Text>
+                        ) : transcribing ? (
+                            <Text variant="bodyMedium" style={styles.transcribingText}>جاري المعالجة...</Text>
+                        ) : (
+                            <Text variant="bodyMedium" style={styles.listeningText}>جاري الاستماع...</Text>
+                        )}
+                    </View>
+                </View>
             </Surface>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.1)',
-        justifyContent: 'center',
+    wrapper: {
+        width: '100%',
         alignItems: 'center',
-        zIndex: 1000,
+        marginVertical: 10,
     },
     container: {
-        padding: 24,
-        borderRadius: 16,
-        alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.95)',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 30,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        width: '85%',
+        borderWidth: 1,
+        borderColor: '#EFEFEF',
     },
-    pulseCircle: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+    content: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    micCircle: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         backgroundColor: '#E57373',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 12,
+        marginLeft: 12,
     },
-    text: {
-        fontSize: 18,
-        fontWeight: 'bold',
+    textContainer: {
+        flexShrink: 1,
+    },
+    listeningText: {
         color: '#E57373',
+        fontWeight: '500',
+        textAlign: 'right',
+    },
+    transcribingText: {
+        color: '#45AC8B',
+        fontWeight: '500',
+        textAlign: 'right',
+    },
+    transcriptionText: {
+        color: '#45AC8B',
+        fontWeight: 'bold',
+        textAlign: 'right',
     },
 });

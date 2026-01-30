@@ -4,6 +4,7 @@ import { Text, Card, ProgressBar, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from './ScreenContainer';
 import { VoiceButton } from './VoiceButton';
+import { ListeningIndicator } from './ListeningIndicator';
 import { voiceService } from '../services/VoiceService';
 import { voiceInputService } from '../services/VoiceInputService';
 import { Protocol } from '../data/protocols';
@@ -15,17 +16,27 @@ interface ProtocolViewerProps {
 
 export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
+    const [voiceState, setVoiceState] = useState({
+        isListening: false,
+        isTranscribing: false,
+        transcription: ''
+    });
     const router = useRouter();
     const step = protocol.steps[currentStepIndex];
     const progress = (currentStepIndex + 1) / protocol.steps.length;
 
     useEffect(() => {
+        const unsubscribe = voiceInputService.subscribe((isListening, isTranscribing, transcription) => {
+            setVoiceState({ isListening, isTranscribing, transcription });
+        });
+
         voiceService.speak(step.voice, () => {
             voiceInputService.startListening(handleVoiceTranscript);
         });
 
         return () => {
-            voiceInputService.stopListening();
+            unsubscribe();
+            voiceInputService.stopListening(false);
         };
     }, [step]);
 
@@ -41,11 +52,12 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
             handleNext();
         } else {
             console.log('No match for protocol action:', text);
+            voiceInputService.startListening(handleVoiceTranscript);
         }
     };
 
     const handleNext = () => {
-        voiceInputService.stopListening();
+        voiceInputService.stopListening(false);
         if (currentStepIndex < protocol.steps.length - 1) {
             setCurrentStepIndex(currentStepIndex + 1);
         } else {
@@ -65,8 +77,8 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
     };
 
     // Only load images for breech protocol
-    const imageSource = protocol.id === 'breech' && step.id 
-        ? BREECH_IMAGES[step.id] 
+    const imageSource = protocol.id === 'breech' && step.id
+        ? BREECH_IMAGES[step.id]
         : null;
 
     return (
@@ -97,11 +109,17 @@ export const ProtocolViewer: React.FC<ProtocolViewerProps> = ({ protocol }) => {
                 </Card.Content>
             </Card>
 
+            <ListeningIndicator
+                visible={voiceState.isListening}
+                transcribing={voiceState.isTranscribing}
+                transcription={voiceState.transcription}
+            />
+
             {/* Image Display - In the central empty space between card and buttons */}
             {imageSource && (
                 <View style={styles.imageContainer}>
-                    <Image 
-                        source={imageSource} 
+                    <Image
+                        source={imageSource}
                         style={styles.image}
                         resizeMode="contain"
                     />

@@ -6,6 +6,7 @@ import { Text, Card } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { VoiceButton } from '../components/VoiceButton';
+import { ListeningIndicator } from '../components/ListeningIndicator';
 import { DangerButton } from '../components/DangerButton';
 import { HomeButton } from '../components/HomeButton';
 import { voiceService } from '../services/VoiceService';
@@ -18,10 +19,19 @@ export default function GuideScreen() {
     const router = useRouter();
     const [currentStageId, setCurrentStageId] = useState(stage as string || 'early');
     const [activeDecision, setActiveDecision] = useState<DecisionPoint | null>(null);
+    const [voiceState, setVoiceState] = useState({
+        isListening: false,
+        isTranscribing: false,
+        transcription: ''
+    });
 
     const currentStage = LABOR_STAGES[currentStageId];
 
     useEffect(() => {
+        const unsubscribe = voiceInputService.subscribe((isListening, isTranscribing, transcription) => {
+            setVoiceState({ isListening, isTranscribing, transcription });
+        });
+
         if (currentStage && !activeDecision) {
             voiceService.speak(currentStage.voiceInstructions.join('. ') + '. ' + currentStage.nextActionVoice, () => {
                 voiceInputService.startListening(handleVoiceTranscript);
@@ -29,7 +39,8 @@ export default function GuideScreen() {
         }
 
         return () => {
-            voiceInputService.stopListening();
+            unsubscribe();
+            voiceInputService.stopListening(false);
         };
     }, [currentStageId, activeDecision]);
 
@@ -49,17 +60,23 @@ export default function GuideScreen() {
 
             if (matchedOption) {
                 handleDecisionAnswer(matchedOption.value, matchedOption.emergency);
+            } else {
+                console.log('No match for decision option:', text);
+                voiceInputService.startListening(handleVoiceTranscript); // Restart listening if no match
             }
         } else {
-            const nextKeywords = ['التالي', 'بعده', 'خلصت', 'تم', 'تمام', 'ماشي', 'خلاص', 'next', 'done'];
-            if (nextKeywords.some(k => text.includes(k))) {
+            const nextKeywords = ['تم', 'خلصت', 'انتهيت', 'نعم', 'أيوه', 'التالي', 'بعده', 'done', 'next', 'finished'];
+            if (nextKeywords.some(keyword => text.includes(keyword))) {
                 handleNextAction();
+            } else {
+                console.log('No match for guide action:', text);
+                voiceInputService.startListening(handleVoiceTranscript);
             }
         }
     };
 
     const handleNextAction = () => {
-        voiceInputService.stopListening();
+        voiceInputService.stopListening(false);
         if (currentStageId === 'early') {
             setCurrentStageId('active');
         } else if (currentStageId === 'active') {
@@ -72,7 +89,7 @@ export default function GuideScreen() {
     const triggerDecision = (decisionId: string) => {
         const decision = CRITICAL_DECISIONS.find(d => d.id === decisionId);
         if (decision) {
-            voiceInputService.stopListening();
+            voiceInputService.stopListening(false);
             setActiveDecision(decision);
             voiceService.speak(decision.voice, () => {
                 voiceInputService.startListening(handleVoiceTranscript);
@@ -81,7 +98,7 @@ export default function GuideScreen() {
     };
 
     const handleDecisionAnswer = (value: string, emergency?: string) => {
-        voiceInputService.stopListening();
+        voiceInputService.stopListening(false);
         if (emergency) {
             voiceService.speak("حالة طارئة! جاري تفعيل البروتوكول.");
             router.push(`/emergency/${emergency}`);
@@ -122,6 +139,12 @@ export default function GuideScreen() {
                     {activeDecision.question}
                 </Text>
 
+                <ListeningIndicator
+                    visible={voiceState.isListening}
+                    transcribing={voiceState.isTranscribing}
+                    transcription={voiceState.transcription}
+                />
+
                 <View style={styles.options}>
                     {activeDecision.options.map((option, index) => (
                         <VoiceButton
@@ -160,6 +183,12 @@ export default function GuideScreen() {
                     ))}
                 </Card.Content>
             </Card>
+
+            <ListeningIndicator
+                visible={voiceState.isListening}
+                transcribing={voiceState.isTranscribing}
+                transcription={voiceState.transcription}
+            />
 
             <View style={styles.spacer} />
 

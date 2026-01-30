@@ -6,6 +6,7 @@ import { Text, ProgressBar, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { VoiceButton } from '../components/VoiceButton';
+import { ListeningIndicator } from '../components/ListeningIndicator';
 import { HomeButton } from '../components/HomeButton';
 import { voiceService } from '../services/VoiceService';
 import { voiceInputService } from '../services/VoiceInputService';
@@ -65,18 +66,28 @@ const QUESTIONS: Question[] = [
 export default function AssessmentScreen() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, any>>({});
+    const [voiceState, setVoiceState] = useState({
+        isListening: false,
+        isTranscribing: false,
+        transcription: ''
+    });
     const router = useRouter();
 
     const question = QUESTIONS[currentQuestionIndex];
     const progress = (currentQuestionIndex + 1) / QUESTIONS.length;
 
     useEffect(() => {
+        const unsubscribe = voiceInputService.subscribe((isListening, isTranscribing, transcription) => {
+            setVoiceState({ isListening, isTranscribing, transcription });
+        });
+
         voiceService.speak(question.voice, () => {
             voiceInputService.startListening(handleVoiceTranscript);
         });
 
         return () => {
-            voiceInputService.stopListening();
+            unsubscribe();
+            voiceInputService.stopListening(false);
         };
     }, [question]);
 
@@ -91,11 +102,12 @@ export default function AssessmentScreen() {
             handleAnswer(matchedOption.value);
         } else {
             console.log('No match for:', text);
+            voiceInputService.startListening(handleVoiceTranscript);
         }
     };
 
     const handleAnswer = async (value: any) => {
-        voiceInputService.stopListening();
+        voiceInputService.stopListening(false);
         const newAnswers = { ...answers, [question.id]: value };
         setAnswers(newAnswers);
 
@@ -138,6 +150,12 @@ export default function AssessmentScreen() {
                     {question.text}
                 </Text>
             </View>
+
+            <ListeningIndicator
+                visible={voiceState.isListening}
+                transcribing={voiceState.isTranscribing}
+                transcription={voiceState.transcription}
+            />
 
             <View style={styles.options}>
                 {question.options.map((option, index) => (

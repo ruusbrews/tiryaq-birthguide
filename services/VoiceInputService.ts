@@ -3,20 +3,22 @@ import { Audio } from 'expo-av';
 class VoiceInputService {
     private recording: Audio.Recording | null = null;
     private isListening = false;
+    private isTranscribing = false;
+    private transcription = '';
     private onTranscriptCallback: ((text: string) => void) | null = null;
     private FANAR_API_KEY = 'QmdDbgqdX4C5gfPrhUx3tpBoY6sxGuLa';
     private FANAR_API_URL = 'https://api.fanar.qa/v1/audio/transcriptions';
     private stopTimeout: any = null;
-    private subscribers: Set<(state: boolean) => void> = new Set();
+    private listeners: Set<(listening: boolean, transcribing: boolean, transcription: string) => void> = new Set();
 
     private notify() {
-        this.subscribers.forEach(cb => cb(this.isListening));
+        this.listeners.forEach(cb => cb(this.isListening, this.isTranscribing, this.transcription));
     }
 
-    subscribe(cb: (state: boolean) => void) {
-        this.subscribers.add(cb);
-        cb(this.isListening);
-        return () => this.subscribers.delete(cb);
+    subscribe(cb: (listening: boolean, transcribing: boolean, transcription: string) => void) {
+        this.listeners.add(cb);
+        cb(this.isListening, this.isTranscribing, this.transcription);
+        return () => this.listeners.delete(cb);
     }
 
     async requestPermissions() {
@@ -54,6 +56,7 @@ class VoiceInputService {
             this.recording = recording;
             this.onTranscriptCallback = callback;
             this.isListening = true;
+            this.transcription = '';
             this.notify();
 
             console.log('Started recording... (will auto-stop in 5s)');
@@ -73,14 +76,22 @@ class VoiceInputService {
         }
     }
 
-    async stopListening() {
+    async stopListening(shouldTranscribe = true) {
         if (!this.isListening) return;
+
+        // Reset the callback early if we are stopping (especially if cancelled)
+        if (!shouldTranscribe) {
+            this.onTranscriptCallback = null;
+        }
 
         if (this.stopTimeout) {
             clearTimeout(this.stopTimeout);
             this.stopTimeout = null;
         }
 
+        if (shouldTranscribe) {
+            this.isTranscribing = true;
+        }
         this.isListening = false;
         this.notify();
         console.log('Stopping recording...');
@@ -91,9 +102,15 @@ class VoiceInputService {
                 const uri = this.recording.getURI();
                 this.recording = null;
 
-                if (uri) {
+                if (uri && shouldTranscribe) {
                     await this.transcribeAudio(uri);
+                } else {
+                    this.isTranscribing = false;
+                    this.notify();
                 }
+            } else {
+                this.isTranscribing = false;
+                this.notify();
             }
         } catch (error) {
             console.error('Failed to stop recording', error);
@@ -137,13 +154,28 @@ class VoiceInputService {
             const data = await response.json();
             console.log('Fanar API Response:', data);
 
-            if (data.text && callback) {
-                callback(data.text);
+            if (data.text) {
+                // If transcription comes back as separated letters (common in some Arabic STT outputs), join them
+                let cleanedText = data.text;
+                if (cleanedText.split(' ').every((s: string) => s.length === 1)) {
+                    cleanedText = cleanedText.split(' ').join('');
+                }
+
+                this.transcription = cleanedText;
+                this.isTranscribing = false;
+                this.notify();
+                if (callback) callback(cleanedText);
             } else {
+                this.isTranscribing = false;
+                this.notify();
                 console.log('No text transcribed or no callback.');
+                if (callback) callback(''); // Signal completion even if empty
             }
         } catch (error) {
+            this.isTranscribing = false;
+            this.notify();
             console.error('Transcription error:', error);
+            if (callback) callback(''); // Signal completion even if error
         }
     }
 

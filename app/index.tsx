@@ -8,16 +8,25 @@ import { ScreenContainer } from '../components/ScreenContainer';
 import { VoiceButton } from '../components/VoiceButton';
 import { DangerButton } from '../components/DangerButton';
 import { voiceService } from '../services/VoiceService';
+import { voiceInputService } from '../services/VoiceInputService';
+import { ListeningIndicator } from '../components/ListeningIndicator';
 
 export default function WelcomeScreen() {
     const router = useRouter();
 
     useEffect(() => {
-        voiceService.init();
-        const timer = setTimeout(() => {
-            voiceService.speak("مرحباً بك في BirthGuide. دعم الأمهات الحوامل، دائماً.");
-        }, 1000);
-        return () => clearTimeout(timer);
+        const initVoice = async () => {
+            await voiceService.init();
+            setTimeout(() => {
+                voiceService.speak("مرحباً بك في BirthGuide. دعم الأمهات الحوامل، دائماً.");
+            }, 1000);
+        };
+
+        initVoice();
+
+        return () => {
+            voiceService.stop();
+        };
     }, []);
 
     const handleHealthTracking = () => {

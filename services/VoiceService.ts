@@ -25,7 +25,10 @@ class VoiceService {
     }
 
     async speak(text: string, onDone?: () => void) {
-        if (this.isMuted) return;
+        if (this.isMuted) {
+            if (onDone) onDone();
+            return;
+        }
         if (this.isSpeaking) {
             await this.stop();
         }

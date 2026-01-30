@@ -177,34 +177,50 @@ npx expo start --clear
 
 ### Services (Logic Layer)
 - **VoiceService (`expo-speech`)**: Handles Text-to-Speech (TTS) in Arabic. 
-  - Optimized for speed (1.1) and natural/kind female voices.
+  - Optimized for speed (0.8) for clarity.
+  - **Mute Toggle**: A dedicated button mutes audio output ONLY.
+- **HealthRecordSMSService (`expo-sms`)**: Compacts and sends prenatal health data.
+  - **SMS Specification**: Uses a pipe-delimited format to stay within character limits: `BIRTHGUIDE|AGE:3|GOV:2|DISP:Y|PREG:Y|MO:7|ANC:Y|...`
 - **VoiceInputService (`expo-av` + Fanar API)**: Powers hands-free interaction.
-  - Records 5-second audio snippets using `Audio.Recording`.
-  - Transcribes audio via **Fanar Aura-STT-1** API.
-  - Uses a subscriber pattern to update UI listening state in real-time.
+  - **Scoped Activity**: STT is active **only** on Assessment questions, Guide instructions, and Emergency Protocols. Other areas (Home, Health Tracking) are touch-only.
+  - **Persistent Mode**: On active screens, STT remains ready continuously. It automatically restarts its listening window if no command is recognized.
+  - **Independent of Mute**: Hands-free input works even when terminal audio output (TTS) is muted via the toggle.
 
 ### Data Layer
-- **`decisions.ts`**: The logic tree for evaluating the stage of birth and emergency risk.
-- **`protocols.ts`**: Structured emergency medical steps (HELLP, Breech, Resuscitation).
-- **`stages.ts`**: Educational content and instructions for normal labor stages.
+- **`HealthRecordStorage.ts`**: Offline-first storage using `AsyncStorage` to persist prenatal records.
+- **`HealthRecordSMSService.ts`**: Logic to compress records into a pipe-delimited SMS format for low-bandwidth submission.
+- **`decisions.ts`**: Logic tree for emergency evaluation.
 
-### External Integrations
-- **Fanar API**: Primary Arabic Speech-to-Speech engine.
-- **Expo SMS**: Sending emergency location alerts.
-- **Expo Camera**: Visual bleeding classification.
+---
+
+## Prenatal Health Tracking System
+The app features an offline-first monitoring system for pregnant women. Data is collected across seven structured sections and submitted via a consolidated SMS:
+- **Section A**: Identification (Age, Location, Displacement status)
+- **Section B**: Pregnancy Status (Months, Medical history, Risk factors)
+- **Section C**: Antenatal Care (Facility visits and diagnostic results)
+- **Section D**: Living Conditions (Accessibility to food and clean water)
+- **Section E**: Mental Health (Depression and wellbeing screening)
+- **Section F & G**: Consent and Data Participation options
+
+**SMS Data Format**: `BIRTHGUIDE|AGE:3|GOV:2|DISP:Y|PREG:Y|MO:7|ANC:Y|...`
+
+---
 
 ## Key Interaction Flow
-1. **Instruction**: `VoiceService` reads steps or questions to the user.
-2. **Listening**: Once instructions finish, `VoiceInputService` automatically starts a 5-second recording window.
-3. **Transcription**: The audio is sent to Fanar AI for Arabic transcription.
-4. **Action**: The app matches keywords (e.g., "نعم", "تم") to progress the user through the protocol hands-free.
+1. **Instruction**: `VoiceService` reads steps or questions (unless muted).
+2. **Targeted Listening**: On question/protocol screens, `ListeningIndicator` appears and STT starts. 
+3. **Continuous Capture**: If no command is matched, the app immediately restarts the 5-second listening window.
+4. **Simultaneous Input**: Both voice and touch are valid at any time. Tapping a button cancel's the current voice capture to prioritize manual intent.
 
 ---
 
 ## Features
-
+- **Hands-free Persistent STT**: Continuous voice monitoring.
+- **Mute-safe Accessibility**: Decoupled audio input/output.
+- **Offline Health Monitoring**: Track prenatal health without internet.
+- **SMS Data Submission**: Send critical health metrics via standard SMS.
+- **WHO Guidelines**: Medical protocols based on international standards.
 - **Bilingual Interface**: Arabic (primary) and English
-- **Hands-free Voice Navigation**: Speak answers in Arabic
 - **Touch-Based Fallback**: Full functionality with button taps only
 - **Emergency Protocols**: Step-by-step guides with visual aids
   - Postpartum Hemorrhage (PPH)
