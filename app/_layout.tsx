@@ -35,6 +35,7 @@ export default function RootLayout() {
         <Stack.Screen name="camera" />
         <Stack.Screen name="postpartum" />
         <Stack.Screen name="references" />
+        <Stack.Screen name="screens/HealthTrackingScreen" />
       </Stack>
     </PaperProvider>
   );

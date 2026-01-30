@@ -15,120 +15,128 @@ export default function WelcomeScreen() {
     useEffect(() => {
         voiceService.init();
         const timer = setTimeout(() => {
-            voiceService.speak("مرحباً. أنا مساعد الولادة في الظروف الطارئة. سأساعدك خطوة بخطوة.");
+            voiceService.speak("مرحباً بك في BirthGuide. دعم الأمهات الحوامل، دائماً.");
         }, 1000);
         return () => clearTimeout(timer);
     }, []);
 
-    const handleAgree = () => {
+    const handleHealthTracking = () => {
+        voiceService.stop();
+        router.push('/screens/HealthTrackingScreen');
+    };
+
+    const handleEmergencyAlert = () => {
         voiceService.stop();
         router.push('/assessment');
     };
 
     return (
-        <ScreenContainer>
+        <ScreenContainer style={styles.container}>
+            {/* a) App Title */}
             <View style={styles.header}>
                 <Text variant="displayMedium" style={styles.title}>BirthGuide</Text>
-                <Text variant="titleMedium" style={styles.subtitle}>دليل الولادة الطارئة</Text>
+
+                {/* b) Tagline */}
+                <Text variant="bodyMedium" style={styles.tagline}>دعم الأمهات الحوامل، دائماً</Text>
             </View>
 
-            <Card style={styles.disclaimerCard}>
-                <Card.Content>
-                    <Text variant="titleLarge" style={styles.warningTitle}>⚠️ تنبيه هام</Text>
-                    <Text variant="bodyLarge" style={styles.warningText}>
-                        هذا التطبيق للطوارئ فقط عندما لا يوجد طبيب.
-                    </Text>
-                    <Text variant="bodyMedium" style={styles.warningSubtext}>
-                        This app is for emergencies ONLY when no doctor is available.
-                    </Text>
-                </Card.Content>
-            </Card>
+            <View style={styles.buttonContainer}>
+                {/* c) Button 1 - Health Tracking */}
+                <Button
+                    mode="contained"
+                    icon="clipboard-edit-outline"
+                    onPress={handleHealthTracking}
+                    style={[styles.actionButton, styles.healthButton]}
+                    contentStyle={styles.buttonContent}
+                    labelStyle={styles.buttonLabel}
+                >
+                    تسجيل الصحة
+                </Button>
 
-            <View style={styles.spacer} />
+                {/* c) Button 2 - Emergency Birth */}
+                <Button
+                    mode="contained"
+                    icon="alert-outline"
+                    onPress={handleEmergencyAlert}
+                    style={[styles.actionButton, styles.emergencyButton]}
+                    contentStyle={styles.buttonContent}
+                    labelStyle={styles.buttonLabel}
+                >
+                    ولادة طارئة الآن
+                </Button>
+            </View>
 
-            <DangerButton
-                text="طوارئ (Emergency)"
-                onPress={() => router.push('/emergency')}
-                style={styles.emergencyButton}
-            />
+            {/* d) Disclaimer */}
+            <View style={styles.disclaimerContainer}>
+                <Text style={styles.disclaimerText}>
+                    هذه ليست نصيحة طبية. هذه معلومات طارئة. إذا أمكن، اتصل أو اذهب إلى أقرب مرفق صحي في أقرب وقت ممكن.
+                </Text>
+            </View>
 
-            <VoiceButton
-                text="أوافق - ابدأ المساعدة"
-                speakText="أوافق. ابدأ المساعدة"
-                onPress={handleAgree}
-                mode="contained"
-                style={styles.startButton}
-            />
-
-            <Button
-                mode="text"
-                onPress={() => router.push('/references')}
-                textColor="#999"
-                style={styles.refButton}
-            >
-                المراجع الطبية / Medical References
-            </Button>
-
-            <Button
-                mode="text"
-                onPress={() => router.push('/postpartum')}
-                textColor="#45AC8B"
-                style={styles.refButton}
-            >
-                ما بعد الولادة / Postpartum Care
-            </Button>
+            {/* Keep existing secondary links if needed, or remove as per design.
+                The instruction says layout: Title -> Tagline -> Buttons -> Disclaimer.
+                I'll remove the extra buttons to keep the layout clean as requested.
+            */}
         </ScreenContainer>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        paddingBottom: 20,
+    },
     header: {
         alignItems: 'center',
-        marginBottom: 32,
-        marginTop: 20,
+        marginTop: 30, // 2) Spacing: Generous top margin (20-30px)
+        marginBottom: 40, // 2) Spacing: Medium gap tagline -> buttons (30-40px)
     },
     title: {
         fontWeight: 'bold',
-        color: '#45AC8B', // Green instead of red
-        marginBottom: 8,
+        color: '#45AC8B', // Brand color
+        textAlign: 'center',
+        marginBottom: 10, // 2) Spacing: Small gap title -> tagline (8-10px)
     },
-    subtitle: {
-        color: '#666',
-    },
-    disclaimerCard: {
-        backgroundColor: '#FFF3E0',
-        marginBottom: 24,
-        borderWidth: 1,
-        borderColor: '#FFB74D',
-    },
-    warningTitle: {
-        color: '#E65100',
-        fontWeight: 'bold',
-        marginBottom: 12,
+    tagline: {
+        fontSize: 15, // 1b) Font size 14-16px
+        color: '#666666', // 1b) Subtle gray
         textAlign: 'center',
     },
-    warningText: {
-        textAlign: 'center',
-        marginBottom: 8,
-        fontSize: 18,
-        lineHeight: 28,
-    },
-    warningSubtext: {
-        textAlign: 'center',
-        color: '#666',
-        fontStyle: 'italic',
-    },
-    spacer: {
+    buttonContainer: {
         flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 20,
     },
-    startButton: {
-        marginTop: 'auto',
-        marginBottom: 12,
+    actionButton: {
+        height: 60, // 6) Accessibility: min 60px
+        borderRadius: 30, // 1c) Large, rounded corners
+        justifyContent: 'center',
+        marginBottom: 20, // 2) Spacing: Medium gap between buttons (15-20px)
+    },
+    buttonContent: {
+        height: 60,
+        flexDirection: 'row-reverse', // RTL icon support
+    },
+    buttonLabel: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    healthButton: {
+        backgroundColor: '#94E394', // 1c) Calming green
     },
     emergencyButton: {
-        marginBottom: 16,
+        backgroundColor: '#FFCDD2', // 1c) Pale red
+        marginBottom: 50, // 2) Spacing: Large gap buttons -> disclaimer (40-50px)
     },
-    refButton: {
-        marginBottom: 8,
-    }
+    disclaimerContainer: {
+        backgroundColor: '#FFF9C4', // 1d) Light yellow
+        padding: 15,
+        borderRadius: 8,
+        marginHorizontal: 10,
+    },
+    disclaimerText: {
+        fontSize: 11.5, // 1d) 11-12px
+        color: '#999999', // 1d) Gray color
+        textAlign: 'center',
+        lineHeight: 18,
+    },
 });
