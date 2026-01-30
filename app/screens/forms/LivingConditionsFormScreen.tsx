@@ -4,6 +4,7 @@ import { Text, Button, RadioButton, Card } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { HealthRecordStorage, HEALTH_RECORD_KEYS } from '../../../services/HealthRecordStorage';
+import { voiceService } from '../../../services/VoiceService';
 
 export default function LivingConditionsFormScreen() {
     const router = useRouter();
@@ -17,6 +18,7 @@ export default function LivingConditionsFormScreen() {
 
     useEffect(() => {
         loadData();
+        voiceService.speak("قسم الظروف المعيشية. معلومات حول الغذاء والمياه والأمان.");
     }, []);
 
     const loadData = async () => {

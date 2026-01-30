@@ -4,6 +4,7 @@ import { Text, Button, RadioButton, Card } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { HealthRecordStorage, HEALTH_RECORD_KEYS } from '../../../services/HealthRecordStorage';
+import { voiceService } from '../../../services/VoiceService';
 
 export default function MentalHealthFormScreen() {
     const router = useRouter();
@@ -14,6 +15,7 @@ export default function MentalHealthFormScreen() {
 
     useEffect(() => {
         loadData();
+        voiceService.speak("قسم الصحة النفسية والدعم. حالتك النفسية والدعم المتاح لك.");
     }, []);
 
     const loadData = async () => {

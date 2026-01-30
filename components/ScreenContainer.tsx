@@ -5,6 +5,7 @@ import { useTheme } from 'react-native-paper';
 
 import { voiceInputService } from '../services/VoiceInputService';
 import { ListeningIndicator } from './ListeningIndicator';
+import { VoiceToggle } from './VoiceToggle';
 
 interface ScreenContainerProps {
     children: React.ReactNode;
@@ -40,6 +41,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
             ) : (
                 Content
             )}
+            <VoiceToggle />
             <ListeningIndicator visible={isListening} />
         </SafeAreaView>
     );

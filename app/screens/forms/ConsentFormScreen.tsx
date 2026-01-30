@@ -4,6 +4,7 @@ import { Text, Button, RadioButton, Card, TextInput } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { HealthRecordStorage, HEALTH_RECORD_KEYS } from '../../../services/HealthRecordStorage';
+import { voiceService } from '../../../services/VoiceService';
 
 export default function ConsentFormScreen() {
     const router = useRouter();
@@ -16,6 +17,7 @@ export default function ConsentFormScreen() {
 
     useEffect(() => {
         loadData();
+        voiceService.speak("قسم الموافقة والتفضيلات. إقرار مشاركة المعلومات والتواصل.");
     }, []);
 
     const loadData = async () => {

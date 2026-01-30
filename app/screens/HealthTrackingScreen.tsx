@@ -4,6 +4,7 @@ import { Text, Button, Card, ProgressBar, IconButton } from 'react-native-paper'
 import { useRouter, useFocusEffect } from 'expo-router';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { HealthRecordStorage, HEALTH_RECORD_KEYS } from '../../services/HealthRecordStorage';
+import { voiceService } from '../../services/VoiceService';
 
 export default function HealthTrackingScreen() {
     const router = useRouter();
@@ -21,6 +22,7 @@ export default function HealthTrackingScreen() {
     useFocusEffect(
         useCallback(() => {
             loadProgress();
+            voiceService.speak("سجل الحمل. أكمل النموذج لمساعدة وزارة الصحة في تخصيص الموارد.");
         }, [])
     );
 

@@ -4,6 +4,7 @@ import { Text, Button, RadioButton, Card, Checkbox } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { HealthRecordStorage, HEALTH_RECORD_KEYS } from '../../../services/HealthRecordStorage';
+import { voiceService } from '../../../services/VoiceService';
 
 export default function PregnancyStatusFormScreen() {
     const router = useRouter();
@@ -24,6 +25,7 @@ export default function PregnancyStatusFormScreen() {
 
     useEffect(() => {
         loadData();
+        voiceService.speak("قسم حالة الحمل والمخاطر. يرجى الإجابة بدقة لضمان سلامتك.");
     }, []);
 
     const loadData = async () => {

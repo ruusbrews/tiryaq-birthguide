@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { HealthRecordStorage, HEALTH_RECORD_KEYS } from '../../../services/HealthRecordStorage';
 import { HealthRecordSMSService } from '../../../services/HealthRecordSMSService';
+import { voiceService } from '../../../services/VoiceService';
 
 export default function SubmitRecordsScreen() {
     const router = useRouter();
@@ -14,6 +15,7 @@ export default function SubmitRecordsScreen() {
 
     useEffect(() => {
         loadAllData();
+        voiceService.speak("مراجعة وإرسال السجلات. يرجى مراجعة ملخص بياناتك قبل الإرسال.");
     }, []);
 
     const loadAllData = async () => {
