@@ -1,7 +1,7 @@
 // index.tsx - Welcome screen with green theme
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Card, Button } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../components/ScreenContainer';
@@ -10,9 +10,11 @@ import { DangerButton } from '../components/DangerButton';
 import { voiceService } from '../services/VoiceService';
 import { voiceInputService } from '../services/VoiceInputService';
 import { ListeningIndicator } from '../components/ListeningIndicator';
+import { ComplianceModal } from '../components/ComplianceModal';
 
 export default function WelcomeScreen() {
     const router = useRouter();
+    const [disclaimerVisible, setDisclaimerVisible] = React.useState(false);
 
     useEffect(() => {
         const initVoice = async () => {
@@ -47,6 +49,10 @@ export default function WelcomeScreen() {
 
                 {/* b) Tagline */}
                 <Text variant="bodyMedium" style={styles.tagline}>دعم الأمهات الحوامل، دائماً</Text>
+
+                <TouchableOpacity onPress={() => setDisclaimerVisible(true)} style={styles.disclaimerLink}>
+                    <Text style={styles.disclaimerLinkText}>إخلاء المسؤولية</Text>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.buttonContainer}>
@@ -86,6 +92,11 @@ export default function WelcomeScreen() {
                 The instruction says layout: Title -> Tagline -> Buttons -> Disclaimer.
                 I'll remove the extra buttons to keep the layout clean as requested.
             */}
+            <ComplianceModal
+                visible={disclaimerVisible}
+                type="home"
+                onDismiss={() => setDisclaimerVisible(false)}
+            />
         </ScreenContainer>
     );
 }
@@ -141,6 +152,15 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 8,
         marginHorizontal: 10,
+    },
+    disclaimerLink: {
+        marginTop: 8,
+    },
+    disclaimerLinkText: {
+        fontSize: 12,
+        color: '#999999',
+        textDecorationLine: 'underline',
+        textAlign: 'center',
     },
     disclaimerText: {
         fontSize: 11.5, // 1d) 11-12px

@@ -235,6 +235,21 @@ The app features an offline-first monitoring system for pregnant women. Data is 
 
 ---
 
+## Legal Compliance & Privacy
+
+### Informed Consent
+BirthGuide prioritizes user autonomy and data transparency:
+- **Explicit Consent**: No health data or emergency alerts are sent without explicit user agreement via a consent popup.
+- **Data Minimization**: Shared health records do not include full names, exact addresses, or GPS coordinates. They focus on clinical metrics for resource planning.
+- **SOS Transparency**: Emergency alerts clearly state that delivery is not guaranteed and that the message is not encrypted.
+
+### Guidance Limitations
+- **First-Response Only**: The app is a first-response tool for crisis settings and does not replace professional medical personnel.
+- **Network Dependency**: Users are informed that app functions like SMS delivery and SOS alerts are dependent on active mobile network availability.
+- **Voluntary Participation**: All data sharing for health planning is voluntary; emergency birth guidance remains fully accessible regardless of data sharing choices.
+
+---
+
 ## Credits & Acknowledgments
 
 ### Medical Protocols

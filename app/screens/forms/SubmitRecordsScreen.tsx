@@ -6,12 +6,14 @@ import { ScreenContainer } from '../../../components/ScreenContainer';
 import { HealthRecordStorage, HEALTH_RECORD_KEYS } from '../../../services/HealthRecordStorage';
 import { HealthRecordSMSService } from '../../../services/HealthRecordSMSService';
 import { voiceService } from '../../../services/VoiceService';
+import { ComplianceModal } from '../../../components/ComplianceModal';
 
 export default function SubmitRecordsScreen() {
     const router = useRouter();
     const [summary, setSummary] = useState<any>(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [consentVisible, setConsentVisible] = useState(false);
 
     useEffect(() => {
         loadAllData();
@@ -30,7 +32,11 @@ export default function SubmitRecordsScreen() {
         setSummary({ id, preg, ant, liv, ment, con, notes });
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = () => {
+        setConsentVisible(true);
+    };
+
+    const performSubmit = async () => {
         setIsLoading(true);
         try {
             // Ministry of Health Emergency Number (Placeholder or as configured)
@@ -137,6 +143,13 @@ export default function SubmitRecordsScreen() {
                     تعديل البيانات
                 </Button>
             </ScrollView>
+
+            <ComplianceModal
+                visible={consentVisible}
+                type="health_consent"
+                onDismiss={() => setConsentVisible(false)}
+                onAgree={performSubmit}
+            />
         </ScreenContainer>
     );
 }
