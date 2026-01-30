@@ -96,4 +96,20 @@ export const EMERGENCY_PROTOCOLS: Record<string, Protocol> = {
             },
         ],
     },
+    immediate: {
+        id: 'immediate',
+        title: 'خطر شديد - مساعدة فورية',
+        steps: [
+            {
+                id: 'emergency_call',
+                text: 'اطلبي المساعدة من أي شخص قريب فوراً.',
+                voice: 'اطلبي المساعدة فوراً. هدوئك مهم جداً الآن.',
+            },
+            {
+                id: 'lie_down',
+                text: 'استلقي في وضعية مريحة ولا تحاولي التحرك كثيراً.',
+                voice: 'استلقي في وضعية مريحة. المساعدة في الطريق.',
+            },
+        ],
+    },
 };
