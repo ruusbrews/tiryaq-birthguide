@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Modal, Portal, Text, Button, IconButton, Surface } from 'react-native-paper';
 
-export type DisclaimerType = 'home' | 'health_consent' | 'emergency_notice';
+export type DisclaimerType = 'home' | 'health_consent' | 'emergency_notice' | 'emergency_birth_info';
 
 interface ComplianceModalProps {
     visible: boolean;
@@ -25,6 +25,11 @@ const DISCLAIMERS = {
     emergency_notice: {
         title: 'تنبيه رسالة الطوارئ',
         content: `سيتم إرسال هذه الرسالة عبر SMS لطلب المساعدة أو مشاركة معلومات عاجلة.\n\n- رسائل SMS ليست مشفرة والتسليم غير مضمون\n- إرسال هذه الرسالة لا يضمن وصول المساعدة\n- استخدم جميع خيارات الطوارئ المتاحة إذا كان ذلك ممكناً\n\nهل تريد إرسال هذه الرسالة الآن؟`,
+        mode: 'consent' as const
+    },
+    emergency_birth_info: {
+        title: 'تنويه معلومات الولادة الطارئة',
+        content: `يرجى القراءة قبل المتابعة\n\nتوفر هذه الميزة معلومات طارئة وإرشادات خطوة بخطوة للولادة عندما لا تتوفر المساعدة الطبية المهنية على الفور.\n\nالإرشادات ليست نصيحة طبية ولا تحل محل الطبيب أو القابلة أو الرعاية الطارئة.\n\nتستند المعلومات إلى مصادر معترف بها دولياً (بما في ذلك إرشادات منظمة الصحة العالمية) ومكيفة لحالات الطوارئ.\n\nتعتمد النتائج على العديد من العوامل؛ واتباع هذه الإرشادات لا يمكن أن يضمن السلامة لكِ أو لطفلكِ.\n\nاطلبي المساعدة الطبية المهنية في أقرب وقت ممكن، حتى لو بدت الولادة تسير بشكل طبيعي.\n\nهذه الميزة مخصصة فقط لدعمكِ في حالة الطوارئ، وليس لتشخيص أو علاج أو اتخاذ قرارات طبية.`,
         mode: 'consent' as const
     }
 };
@@ -73,20 +78,20 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({ visible, type,
                                     onDismiss();
                                 }}
                                 style={styles.agreeButton}
-                                icon="check-circle"
+                                icon={type === 'emergency_birth_info' ? 'play-circle' : 'check-circle'}
                                 contentStyle={styles.buttonContent}
                             >
-                                أوافق - إرسال SMS
+                                {type === 'emergency_birth_info' ? '▶️ متابعة' : 'أوافق - إرسال SMS'}
                             </Button>
                             <Button
                                 mode="outlined"
                                 onPress={onDismiss}
                                 style={styles.cancelButton}
-                                icon="close-circle"
+                                icon={type === 'emergency_birth_info' ? 'arrow-left-circle' : 'close-circle'}
                                 contentStyle={styles.buttonContent}
                                 textColor="#D32F2F"
                             >
-                                إلغاء
+                                {type === 'emergency_birth_info' ? '⬅️ العودة' : 'إلغاء'}
                             </Button>
                         </View>
                     )}

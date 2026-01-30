@@ -15,6 +15,7 @@ import { ComplianceModal } from '../components/ComplianceModal';
 export default function WelcomeScreen() {
     const router = useRouter();
     const [disclaimerVisible, setDisclaimerVisible] = React.useState(false);
+    const [emergencyNoticeVisible, setEmergencyNoticeVisible] = React.useState(false);
 
     useEffect(() => {
         const initVoice = async () => {
@@ -38,6 +39,10 @@ export default function WelcomeScreen() {
 
     const handleEmergencyAlert = () => {
         voiceService.stop();
+        setEmergencyNoticeVisible(true);
+    };
+
+    const confirmEmergencyAlert = () => {
         router.push('/assessment');
     };
 
@@ -96,6 +101,13 @@ export default function WelcomeScreen() {
                 visible={disclaimerVisible}
                 type="home"
                 onDismiss={() => setDisclaimerVisible(false)}
+            />
+
+            <ComplianceModal
+                visible={emergencyNoticeVisible}
+                type="emergency_birth_info"
+                onDismiss={() => setEmergencyNoticeVisible(false)}
+                onAgree={confirmEmergencyAlert}
             />
         </ScreenContainer>
     );
