@@ -1,16 +1,17 @@
 # BirthGuide: Emergency Childbirth Assistant
 
-**BirthGuide** is a bilingual (Arabic/English) mobile application designed to guide women through emergency childbirth situations when professional medical help is unavailable. Built with React Native and Expo, it provides step-by-step voice-guided protocols based on WHO and UNFPA emergency obstetric care guidelines, enabling hands-free navigation during high-pressure labor situations.
+**BirthGuide** is a bilingual (Arabic/English) mobile application designed to guide women through emergency childbirth situations when qualified assistance is unavailable. Built with React Native and Expo, it provides step-by-step voice-guided protocols based on WHO and UNFPA emergency obstetric care guidelines, enabling hands-free navigation during high-pressure labor situations.
 
-**MEDICAL DISCLAIMER**: This application is designed for **emergency situations ONLY** when professional medical help is unavailable. It is based on WHO emergency obstetric care protocols but **should never replace professional medical assistance**.
+**DISCLAIMER**: This application is designed for **emergency situations ONLY** when qualified assistance is unavailable. It is based on WHO emergency obstetric care protocols but **should never replace qualified healthcare services**.
 
 ---
 
 ## 🌟 Key New Features (Implemented Jan 2026)
 
-### 1. Research-Backed Midwife Assessment
-A professional-grade decision tree derived from international midwifery standards.
+### 1. Structured Emergency Assessment
+A structured decision tree derived from international emergency standards.
 - **Triage Logic**: Immediate "kill-switch" detection for critical dangers (e.g., breech presentation, severe hemorrhage).
+- **Visual Decision Support**: Integrated illustrative images for decision tree nodes and emergency protocols to aid in rapid recognition and action.
 - **Clinical Domains**: Structured evaluation of pain patterns, bleeding color/volume, fetal movement, and obstetric history.
 - **Risk Scoring**: Automated calculation of risk levels (Safe, Monitor, High Risk) to tailor guidance.
 
@@ -69,7 +70,7 @@ Update `VoiceInputService.ts` with your **Fanar API Key** for Arabic Speech-to-T
 
 ---
 
-## 📜 Medical Sources & Acknowledgments
+## 📜 Sources & Acknowledgments
 - **WHO**: Emergency Obstetric Care (IMPAC)
 - **UNFPA**: Basic Emergency Obstetric and Newborn Care guidelines
 - **Fanar AI**: Arabic Speech-to-Text integration
