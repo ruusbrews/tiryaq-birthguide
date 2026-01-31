@@ -162,7 +162,7 @@ export default function EmergencyCsectionScreen() {
 }
 
 const styles = StyleSheet.create({
-    header: { alignItems: 'center', paddingVertical: 24, backgroundColor: '#ffebee', borderBottomWidth: 3, borderBottomColor: '#d32f2f' },
+    header: { alignItems: 'center', paddingVertical: 24, backgroundColor: '#ffebee', borderBottomWidth: 3, borderBottomColor: '#d32f2f', marginTop: 20 },
     emergencyTitle: { color: '#d32f2f', fontWeight: 'bold' },
     subtitle: { color: '#666', marginTop: 8 },
     content: { flex: 1, padding: 16 },

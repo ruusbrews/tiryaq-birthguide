@@ -6,6 +6,7 @@ import { useTheme } from 'react-native-paper';
 import { voiceInputService } from '../services/VoiceInputService';
 import { ListeningIndicator } from './ListeningIndicator';
 import { VoiceToggle } from './VoiceToggle';
+import { LanguageToggle } from './LanguageToggle';
 
 interface ScreenContainerProps {
     children: React.ReactNode;
@@ -35,7 +36,10 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
             ) : (
                 Content
             )}
-            <VoiceToggle />
+            <View style={styles.topRightControls}>
+                <LanguageToggle />
+                <VoiceToggle />
+            </View>
         </SafeAreaView>
     );
 };
@@ -50,5 +54,13 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 20,
+    },
+    topRightControls: {
+        position: 'absolute',
+        top: 20,
+        right: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        zIndex: 1000,
     },
 });

@@ -28,10 +28,7 @@ export const VoiceToggle: React.FC = () => {
 
 const styles = StyleSheet.create({
     container: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        zIndex: 1000,
+        // Layout managed by parent row in ScreenContainer
     },
     button: {
         backgroundColor: 'rgba(255, 255, 255, 0.8)',

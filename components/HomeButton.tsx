@@ -26,8 +26,8 @@ export const HomeButton: React.FC = () => {
 const styles = StyleSheet.create({
     button: {
         position: 'absolute',
-        top: 10,
-        left: 10,
+        top: 20,
+        left: 15,
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
         elevation: 4,
     },

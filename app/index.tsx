@@ -11,11 +11,42 @@ import { voiceService } from '../services/VoiceService';
 import { voiceInputService } from '../services/VoiceInputService';
 import { ListeningIndicator } from '../components/ListeningIndicator';
 import { ComplianceModal } from '../components/ComplianceModal';
+import { useLanguage } from '../context/LanguageContext';
+import { Animated } from 'react-native';
+
+const TRANSLATIONS = {
+    ar: {
+        tagline: "دعم الأمهات الحوامل، دائماً",
+        disclaimer_link: "إخلاء المسؤولية",
+        health_btn: "تسجيل الصحة",
+        emergency_btn: "ولادة طارئة الآن",
+        bottom_disclaimer: "هذه ليست نصيحة طبية. هذه معلومات طارئة. إذا أمكن، اتصل أو اذهب إلى أقرب مرفق صحي في أقرب وقت ممكن."
+    },
+    en: {
+        tagline: "Supporting Pregnant Mothers, Always",
+        disclaimer_link: "Legal Disclaimer",
+        health_btn: "Health Records",
+        emergency_btn: "Emergency Birth Now",
+        bottom_disclaimer: "This is not medical advice. This is emergency information. If possible, call or go to the nearest health facility as soon as possible."
+    }
+};
 
 export default function WelcomeScreen() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = TRANSLATIONS[language];
+
     const [disclaimerVisible, setDisclaimerVisible] = React.useState(false);
     const [emergencyNoticeVisible, setEmergencyNoticeVisible] = React.useState(false);
+    const fadeAnim = React.useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        // Smooth transition when language changes
+        Animated.sequence([
+            Animated.timing(fadeAnim, { toValue: 0.5, duration: 150, useNativeDriver: true }),
+            Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+        ]).start();
+    }, [language]);
 
     useEffect(() => {
         const initVoice = async () => {
@@ -48,55 +79,53 @@ export default function WelcomeScreen() {
 
     return (
         <ScreenContainer style={styles.container}>
-            {/* a) App Title */}
-            <View style={styles.header}>
-                <Text variant="displayMedium" style={styles.title}>BirthGuide</Text>
+            <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+                {/* a) App Title */}
+                <View style={styles.header}>
+                    <Text variant="displayMedium" style={styles.title}>BirthGuide</Text>
 
-                {/* b) Tagline */}
-                <Text variant="bodyMedium" style={styles.tagline}>دعم الأمهات الحوامل، دائماً</Text>
+                    {/* b) Tagline */}
+                    <Text variant="bodyMedium" style={styles.tagline}>{t.tagline}</Text>
 
-                <TouchableOpacity onPress={() => setDisclaimerVisible(true)} style={styles.disclaimerLink}>
-                    <Text style={styles.disclaimerLinkText}>إخلاء المسؤولية</Text>
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity onPress={() => setDisclaimerVisible(true)} style={styles.disclaimerLink}>
+                        <Text style={styles.disclaimerLinkText}>{t.disclaimer_link}</Text>
+                    </TouchableOpacity>
+                </View>
 
-            <View style={styles.buttonContainer}>
-                {/* c) Button 1 - Health Tracking */}
-                <Button
-                    mode="contained"
-                    icon="clipboard-edit-outline"
-                    onPress={handleHealthTracking}
-                    style={[styles.actionButton, styles.healthButton]}
-                    contentStyle={styles.buttonContent}
-                    labelStyle={styles.buttonLabel}
-                >
-                    تسجيل الصحة
-                </Button>
+                <View style={styles.buttonContainer}>
+                    {/* c) Button 1 - Health Tracking */}
+                    <Button
+                        mode="contained"
+                        icon="clipboard-edit-outline"
+                        onPress={handleHealthTracking}
+                        style={[styles.actionButton, styles.healthButton]}
+                        contentStyle={[styles.buttonContent, language === 'en' && { flexDirection: 'row' }]}
+                        labelStyle={styles.buttonLabel}
+                    >
+                        {t.health_btn}
+                    </Button>
 
-                {/* c) Button 2 - Emergency Birth */}
-                <Button
-                    mode="contained"
-                    icon="alert-outline"
-                    onPress={handleEmergencyAlert}
-                    style={[styles.actionButton, styles.emergencyButton]}
-                    contentStyle={styles.buttonContent}
-                    labelStyle={styles.buttonLabel}
-                >
-                    ولادة طارئة الآن
-                </Button>
-            </View>
+                    {/* c) Button 2 - Emergency Birth */}
+                    <Button
+                        mode="contained"
+                        icon="alert-outline"
+                        onPress={handleEmergencyAlert}
+                        style={[styles.actionButton, styles.emergencyButton]}
+                        contentStyle={[styles.buttonContent, language === 'en' && { flexDirection: 'row' }]}
+                        labelStyle={styles.buttonLabel}
+                    >
+                        {t.emergency_btn}
+                    </Button>
+                </View>
 
-            {/* d) Disclaimer */}
-            <View style={styles.disclaimerContainer}>
-                <Text style={styles.disclaimerText}>
-                    هذه ليست نصيحة طبية. هذه معلومات طارئة. إذا أمكن، اتصل أو اذهب إلى أقرب مرفق صحي في أقرب وقت ممكن.
-                </Text>
-            </View>
+                {/* d) Disclaimer */}
+                <View style={styles.disclaimerContainer}>
+                    <Text style={styles.disclaimerText}>
+                        {t.bottom_disclaimer}
+                    </Text>
+                </View>
+            </Animated.View>
 
-            {/* Keep existing secondary links if needed, or remove as per design.
-                The instruction says layout: Title -> Tagline -> Buttons -> Disclaimer.
-                I'll remove the extra buttons to keep the layout clean as requested.
-            */}
             <ComplianceModal
                 visible={disclaimerVisible}
                 type="home"
@@ -119,7 +148,7 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: 'center',
-        marginTop: 30, // 2) Spacing: Generous top margin (20-30px)
+        marginTop: 50, // 2) Spacing: Increased top margin
         marginBottom: 40, // 2) Spacing: Medium gap tagline -> buttons (30-40px)
     },
     title: {

@@ -416,7 +416,7 @@ export default function EnhancedAssessmentScreen() {
 }
 
 const styles = StyleSheet.create({
-    header: { marginBottom: 24, marginTop: 40 },
+    header: { marginBottom: 24, marginTop: 60 },
     title: { textAlign: 'center', marginBottom: 16, color: '#666' },
     progress: { height: 8, borderRadius: 4 },
     scrollContainer: { flex: 1 },
