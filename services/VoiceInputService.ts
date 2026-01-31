@@ -6,7 +6,7 @@ class VoiceInputService {
     private isTranscribing = false;
     private transcription = '';
     private onTranscriptCallback: ((text: string) => void) | null = null;
-    private FANAR_API_KEY = 'QmdDbgqdX4C5gfPrhUx3tpBoY6sxGuLa';
+    private FANAR_API_KEY = 'ixVmNEbLwpwW9PjfJpPn1cG8HCFhZA2L';
     private FANAR_API_URL = 'https://api.fanar.qa/v1/audio/transcriptions';
     private stopTimeout: any = null;
     private listeners: Set<(listening: boolean, transcribing: boolean, transcription: string) => void> = new Set();

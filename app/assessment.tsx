@@ -1,7 +1,7 @@
 // assessment.tsx - Enhanced professional assessment with triage logic
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import { Text, ProgressBar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../components/ScreenContainer';
@@ -17,6 +17,7 @@ interface Question {
     domain: 'triage' | 'pain' | 'bleeding' | 'water' | 'baby' | 'history';
     text: string;
     voice: string;
+    image?: any;
     options: {
         label: string;
         value: any;
@@ -33,6 +34,7 @@ const TRIAGE_QUESTIONS: Question[] = [
         domain: 'triage',
         text: 'هل يوجد نزيف شديد جداً الآن؟ (دم غزير يملأ فوطة كاملة في أقل من 5 دقائق)',
         voice: 'هل يوجد نزيف شديد جداً الآن؟',
+        image: require('../assets/decision-tree-images/heaviness_of_bleeding.jpeg'),
         critical: true,
         options: [
             {
@@ -140,6 +142,7 @@ const ASSESSMENT_QUESTIONS: Question[] = [
         domain: 'bleeding',
         text: 'هل يوجد نزيف (دم) الآن؟',
         voice: 'هل يوجد نزيف أو دم؟',
+        image: require('../assets/decision-tree-images/bleeding_color.jpeg'),
         options: [
             {
                 label: 'نعم',
@@ -160,6 +163,7 @@ const ASSESSMENT_QUESTIONS: Question[] = [
         domain: 'water',
         text: 'هل نزل ماء الولادة (انفجر الكيس المائي)؟',
         voice: 'هل نزل ماء كثير من المهبل؟',
+        image: require('../assets/decision-tree-images/color_of_water_broken.jpeg'),
         options: [
             {
                 label: 'نعم، نزل ماء كثير',
@@ -180,6 +184,7 @@ const ASSESSMENT_QUESTIONS: Question[] = [
         domain: 'baby',
         text: 'هل الطفل يتحرك الآن؟',
         voice: 'هل تشعرين بحركة الطفل الآن؟',
+        image: require('../assets/decision-tree-images/baby_movement.jpeg'),
         options: [
             {
                 label: 'نعم، يتحرك',
@@ -201,6 +206,7 @@ const ASSESSMENT_QUESTIONS: Question[] = [
         domain: 'baby',
         text: 'هل تشعرين برغبة قوية للدفع (مثل الحاجة للتبرز)؟',
         voice: 'هل تشعرين برغبة قوية للدفع؟',
+        image: require('../assets/decision-tree-images/urge_to_push.jpeg'),
         options: [
             {
                 label: 'نعم، قوية جداً',
@@ -387,6 +393,13 @@ export default function EnhancedAssessmentScreen() {
                     <Text variant="headlineMedium" style={styles.questionText}>
                         {question.text}
                     </Text>
+                    {question.image && (
+                        <Image
+                            source={question.image}
+                            style={styles.questionImage}
+                            resizeMode="contain"
+                        />
+                    )}
                 </View>
 
                 <ListeningIndicator
@@ -427,4 +440,10 @@ const styles = StyleSheet.create({
     emergencyButton: { backgroundColor: '#d32f2f' },
     helperNote: { alignItems: 'center', marginBottom: 20, marginTop: 8 },
     helperText: { fontSize: 13, color: '#45AC8B', fontStyle: 'italic' },
+    questionImage: {
+        width: '100%',
+        height: 200,
+        marginTop: 16,
+        borderRadius: 8,
+    },
 });
